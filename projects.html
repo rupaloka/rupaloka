@@ -12,20 +12,20 @@
   <div class="container">
     <h1>Rupaloka Studio</h1>
     <h2>Daftar Proyek</h2>
-    <button onclick="logout()">Logout</button>
+    <button onclick="logout()" style="float:right; margin-top:-60px; background:#0066cc; color:white; padding:10px 20px; border:none; border-radius:6px; cursor:pointer;">Logout</button>
 
-    <!-- Form Tambah Proyek (Admin Only) -->
-    <div id="admin-form" style="display:none; background:#f0f8ff; padding:20px; border-radius:10px; margin:20px 0;">
-      <h3>Tambah Proyek Baru</h3>
-      <input type="text" id="namaProyek" placeholder="Nama Proyek" required /><br><br>
-      <input type="text" id="pemberiKerja" placeholder="Nama Pemberi Kerja" required /><br><br>
-      <input type="number" id="nilaiProyek" placeholder="Nilai Proyek (angka saja)" required /><br><br>
-      <input type="date" id="mulaiProyek" required /> <strong>s/d</strong>
-      <input type="date" id="selesaiProyek" required /><br><br>
-      <button onclick="tambahProyek()">Tambah Proyek</button>
+    <!-- Form Tambah Proyek (Hanya Admin) -->
+    <div id="adminForm" style="display:none; background:#e3f2fd; padding:20px; border-radius:12px; margin:20px 0; border:2px solid #0066cc;">
+      <h3 style="margin-top:0; color:#0066cc;">Tambah Proyek Baru</h3>
+      <input type="text" id="namaProyek" placeholder="Nama Proyek" style="width:100%; padding:12px; margin:8px 0; border-radius:6px; border:1px solid #ccc;"><br>
+      <input type="text" id="pemberiKerja" placeholder="Pemberi Kerja" style="width:100%; padding:12px; margin:8px 0; border-radius:6px; border:1px solid #ccc;"><br>
+      <input type="number" id="nilaiProyek" placeholder="Nilai Proyek (contoh: 250000000)" style="width:100%; padding:12px; margin:8px 0; border-radius:6px; border:1px solid #ccc;"><br>
+      <button onclick="tambahProyek()" style="background:#0066cc; color:white; padding:12px 24px; border:none; border-radius:6px; cursor:pointer; font-weight:bold;">Tambah Proyek</button>
     </div>
 
-    <div id="projectList"></div>
+    <div id="projectList" style="margin-top:30px;">
+      <p style="text-align:center; color:#666; font-size:1.1em;">Loading proyek...</p>
+    </div>
   </div>
 
   <script src="js/firebase.js"></script>
