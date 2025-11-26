@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Daftar Proyek - Rupaloka Studio</title>
   <link rel="stylesheet" href="css/style.css" />
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
 </head>
 <body>
   <div class="container">
@@ -14,11 +14,10 @@
     <h2>Daftar Proyek</h2>
     <button onclick="logout()" style="float:right; margin-top:-60px; background:#0066cc; color:white; padding:10px 20px; border:none; border-radius:6px;">Logout</button>
 
-    <!-- Form Tambah Proyek (Hanya Admin) — ID HARUS "formTambahProyek" -->
     <div id="formTambahProyek" style="display:none; background:#e3f2fd; padding:25px; border-radius:12px; margin:20px 0; border:2px solid #0066cc;">
       <h3 style="margin-top:0; color:#0066cc;">Tambah Proyek Baru</h3>
-      <input type="text" id="namaProyek" placeholder="Nama Proyek" style="width:100%; padding:12px; margin:8px 0; border-radius:6px; border:1px solid #ccc;"><br>
-      <input type="text" id="pemberiKerja" placeholder="Pemberi Kerja" style="width:100%; padding:12px; margin:8px 0; border-radius:6px; border:1px solid #ccc;"><br>
+      <input type="text" id="namaProyek" placeholder="Nama Proyek (contoh: Renovasi Charitas)" style="width:100%; padding:12px; margin:8px 0; border-radius:6px; border:1px solid #ccc;"><br>
+      <input type="text" id="pemberiKerja" placeholder="Pemberi Kerja (contoh: RS Charitas)" style="width:100%; padding:12px; margin:8px 0; border-radius:6px; border:1px solid #ccc;"><br>
       <input type="number" id="nilaiProyek" placeholder="Nilai Proyek (contoh: 1000000000)" style="width:100%; padding:12px; margin:8px 0; border-radius:6px; border:1px solid #ccc;"><br>
       <button onclick="tambahProyek()" style="background:#0066cc; color:white; padding:12px 30px; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">Tambah Proyek</button>
     </div>
