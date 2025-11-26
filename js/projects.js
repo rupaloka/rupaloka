@@ -3,7 +3,6 @@ import { db, collection, addDoc, query, orderBy, onSnapshot, doc, deleteDoc } fr
 const user = JSON.parse(localStorage.getItem("user"));
 if (!user) window.location.href = "index.html";
 
-// Tampilkan form hanya untuk admin
 if (user.role === "admin") {
   document.getElementById("formTambahProyek").style.display = "block";
 }
@@ -12,8 +11,8 @@ function rupiah(angka) {
   return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(angka);
 }
 
-// ==== TAMBAH PROYEK ====
-window.tambahProyek = function () {          // ← DIBUAT GLOBAL AGAR BISA DI-ONCLICK HTML
+// TOMBOL TAMBAH PROYEK — PAKAI EVENT LISTENER (INI YANG BIKIN KLIK JALAN!)
+document.getElementById("btnTambahProyek")?.addEventListener("click", async () => {
   const nama = document.getElementById("namaProyek").value.trim();
   const pemberi = document.getElementById("pemberiKerja").value.trim();
   const nilai = parseInt(document.getElementById("nilaiProyek").value);
@@ -23,30 +22,32 @@ window.tambahProyek = function () {          // ← DIBUAT GLOBAL AGAR BISA DI-O
     return;
   }
 
-  addDoc(collection(db, "projects"), {
-    namaProyek: nama,
-    pemberiKerja: pemberi,
-    nilaiProyek: nilai,
-    createdAt: new Date()
-  }).then(() => {
+  try {
+    await addDoc(collection(db, "projects"), {
+      namaProyek: nama,
+      pemberiKerja: pemberi,
+      nilaiProyek: nilai,
+      createdAt: new Date()
+    });
     alert("Proyek berhasil ditambahkan!");
     document.getElementById("namaProyek").value = "";
     document.getElementById("pemberiKerja").value = "";
     document.getElementById("nilaiProyek").value = "";
-  }).catch(err => alert("Error: " + err.message));
-};
+  } catch (err) {
+    alert("Gagal: " + err.message);
+  }
+});
 
-// ==== LOAD PROYEK (HANYA SEKALI SAJA!) ====
+// LOAD PROYEK (stabil, tidak kedip)
 const list = document.getElementById("projectList");
 const q = query(collection(db, "projects"), orderBy("createdAt", "desc"));
 
-const unsubscribe = onSnapshot(q, (snap) => {
-  list.innerHTML = "";                     // Kosongkan sekali saja
+onSnapshot(q, (snap) => {
+  list.innerHTML = "";
   if (snap.empty) {
     list.innerHTML = "<p style='text-align:center; color:#999; padding:40px;'>Belum ada proyek.</p>";
     return;
   }
-
   snap.forEach((d) => {
     const p = d.data();
     const item = document.createElement("div");
@@ -58,17 +59,14 @@ const unsubscribe = onSnapshot(q, (snap) => {
         <button onclick="location.href='transactions.html?project=${d.id}'" style="padding:10px 20px; background:#0066cc; color:white; border:none; border-radius:6px;">
           ${user.role === "admin" ? "Transaksi" : "Lihat Transaksi"}
         </button>
-        ${user.role === "admin" ? `<button onclick="if(confirm('Hapus proyek ini?')) deleteDoc(doc(db, 'projects', '${d.id}'))" style="margin-left:10px; padding:10px 20px; background:#d32f2f; color:white; border:none; border-radius:6px;">Hapus</button>` : ""}
+        ${user.role === "admin" ? `<button onclick="deleteDoc(doc(db, 'projects', '${d.id}')).then(()=>location.reload())" style="margin-left:10px; padding:10px 20px; background:#d32f2f; color:white; border:none; border-radius:6px;">Hapus</button>` : ""}
       </div>
     `;
     list.appendChild(item);
   });
-}, (err) => {
-  list.innerHTML = `<p style="color:red; text-align:center;">Error: ${err.message}</p>`;
 });
 
-// ==== LOGOUT ====
-window.logout = function () {
+window.logout = () => {
   localStorage.clear();
-  window.location.href = "index.html";
+  location.href = "index.html";
 };
