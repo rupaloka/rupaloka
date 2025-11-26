@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Daftar Proyek - Rupaloka Studio</title>
-  <link rel="stylesheet" href="css/style.css" />
   <style>
     body { font-family: Arial, sans-serif; background:#f5f7fa; margin:0; padding:20px; }
     .container { max-width: 900px; margin: auto; background: white; padding: 30px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
@@ -21,30 +20,23 @@
       border:3px solid #3b82f6; 
       margin-bottom:40px; 
     }
-    #formTambahProyek h3 { color:#1e40af; margin-top:0; }
-    input { 
-      width:100%; 
-      padding:14px; 
-      margin:10px 0; 
-      border-radius:8px; 
-      border:1px solid #ccc; 
-      font-size:16px; 
-      box-sizing:border-box; 
-    }
-    #btnTambahProyek { 
-      background:#2563eb; 
-      color:white; 
-      padding:16px 40px; 
-      border:none; 
-      border-radius:10px; 
-      font-weight:bold; 
-      font-size:17px; 
-      cursor:pointer; 
-      width:100%; 
-      margin-top:10px; 
-    }
+    input { width:100%; padding:14px; margin:10px 0; border-radius:8px; border:1px solid #ccc; font-size:16px; box-sizing:border-box; }
+    #btnTambahProyek { background:#2563eb; color:white; padding:16px; border:none; border-radius:10px; font-weight:bold; font-size:17px; cursor:pointer; width:100%; margin-top:10px; }
     #btnTambahProyek:hover { background:#1d4ed8; }
-    #projectList { min-height:100px; }
+
+    .project-item {
+      background:white; padding:22px; margin:18px 0; border-radius:14px; 
+      box-shadow:0 6px 20px rgba(0,0,0,0.08); border-left:7px solid #2563eb; 
+      cursor:pointer; position:relative;
+    }
+    .project-item:hover { background:#f8faff; transform:translateY(-2px); transition:all 0.2s; }
+    .project-name { font-size:1.4em; font-weight:bold; color:#1e293b; }
+    .project-info { color:#64748b; font-size:0.95em; }
+    .admin-actions { position:absolute; top:18px; right:18px; opacity:0; transition:opacity 0.2s; }
+    .project-item:hover .admin-actions { opacity:1; }
+    .admin-actions button {
+      background:none; border:none; font-size:1.4em; cursor:pointer; margin-left:8px;
+    }
   </style>
 </head>
 <body>
@@ -57,25 +49,22 @@
       <button class="logout-btn" onclick="logout()">Logout</button>
     </div>
 
-    <!-- FORM TAMBAH PROYEK (Hanya untuk admin) -->
     <div id="formTambahProyek">
-      <h3>Tambah Proyek Baru</h3>
-      <input type="text" id="namaProyek" placeholder="Nama Proyek (contoh: Renovasi Kantin)" required />
-      <input type="text" id="pemberiKerja" placeholder="Pemberi Kerja (contoh: Charitas)" required />
-      <input type="number" id="nilaiProyek" placeholder="Nilai Proyek (contoh: 150000000)" required />
+      <h3 style="color:#1e40af; margin-top:0;">Tambah Proyek Baru</h3>
+      <input type="text" id="namaProyek" placeholder="Nama Proyek" required />
+      <input type="text" id="pemberiKerja" placeholder="Pemberi Kerja" required />
+      <input type="number" id="nilaiProyek" placeholder="Nilai Proyek (contoh: 100000000)" required />
       <button id="btnTambahProyek">Tambah Proyek</button>
     </div>
 
-    <!-- DAFTAR PROYEK -->
     <div id="projectList">
       <p style="text-align:center; color:#888; padding:50px 0;">Loading proyek...</p>
     </div>
   </div>
 
-  <!-- Firebase Modular v10 (paling stabil 2025) -->
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js';
-    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, doc, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js';
+    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, doc, deleteDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js';
 
     const firebaseConfig = {
       apiKey: "AIzaSyBiE0oYuXiPNJKC4p7PtfkFeI0sci3BdgI",
@@ -89,49 +78,29 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // Cek login
     const user = JSON.parse(localStorage.getItem("user"));
     if (!user) window.location.href = "index.html";
+    if (user.role === "admin") document.getElementById("formTambahProyek").style.display = "block";
 
-    // Admin → tampilkan form
-    if (user.role === "admin") {
-      document.getElementById("formTambahProyek").style.display = "block";
-    }
-
-    // Format rupiah
     const rupiah = (n) => new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(n);
 
-    // Tombol Tambah Proyek
+    // Tambah Proyek
     document.getElementById("btnTambahProyek")?.addEventListener("click", async () => {
       const nama = document.getElementById("namaProyek").value.trim();
       const pemberi = document.getElementById("pemberiKerja").value.trim();
       const nilai = parseInt(document.getElementById("nilaiProyek").value);
+      if (!nama || !pemberi || !nilai) return alert("Isi semua kolom!");
 
-      if (!nama || !pemberi || !nilai || nilai <= 0) {
-        alert("Isi semua kolom dengan benar!");
-        return;
-      }
-
-      try {
-        await addDoc(collection(db, "projects"), {
-          namaProyek: nama,
-          pemberiKerja: pemberi,
-          nilaiProyek: nilai,
-          createdAt: new Date()
-        });
-        alert("Proyek berhasil ditambahkan!");
-        document.getElementById("namaProyek").value = "";
-        document.getElementById("pemberiKerja").value = "";
-        document.getElementById("nilaiProyek").value = "";
-      } catch (e) {
-        alert("Gagal: " + e.message);
-      }
+      await addDoc(collection(db, "projects"), { namaProyek: nama, pemberiKerja: pemberi, nilaiProyek: nilai, createdAt: new Date() });
+      alert("Proyek berhasil ditambahkan!");
+      document.getElementById("namaProyek").value = "";
+      document.getElementById("pemberiKerja").value = "";
+      document.getElementById("nilaiProyek").value = "";
     });
 
-    // Load daftar proyek (real-time)
+    // Load Proyek
     const list = document.getElementById("projectList");
     const q = query(collection(db, "projects"), orderBy("createdAt", "desc"));
-
     onSnapshot(q, (snap) => {
       list.innerHTML = "";
       if (snap.empty) {
@@ -141,26 +110,37 @@
       snap.forEach((d) => {
         const p = d.data();
         const item = document.createElement("div");
-        item.style = "background:white; padding:25px; margin:20px 0; border-radius:14px; box-shadow:0 6px 20px rgba(0,0,0,0.08); border-left:7px solid #2563eb;";
+        item.className = "project-item";
+        item.onclick = () => location.href = `transactions.html?project=${d.id}`;
+
         item.innerHTML = `
-          <strong style="font-size:1.4em; color:#1e293b;">${p.namaProyek}</strong><br>
-          <small style="color:#64748b;">${p.pemberiKerja} • ${rupiah(p.nilaiProyek)}</small>
-          <div style="margin-top:18px;">
-            <button onclick="location.href='transactions.html?project=${d.id}'" style="padding:12px 24px; background:#2563eb; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold;">
-              ${user.role === "admin" ? "Transaksi" : "Lihat Transaksi"}
-            </button>
-            ${user.role === "admin" ? `<button onclick="if(confirm('Hapus proyek ini?')) deleteDoc(doc(db,'projects','${d.id}')).then(()=>alert('Terhapus!'))" style="margin-left:12px; padding:12px 24px; background:#dc2626; color:white; border:none; border-radius:8px; cursor:pointer;">Hapus</button>` : ""}
-          </div>
+          <div class="project-name">${p.namaProyek}</div>
+          <div class="project-info">${p.pemberiKerja} • ${rupiah(p.nilaiProyek)}</div>
+          ${user.role === "admin" ? `
+            <div class="admin-actions">
+              <button onclick="event.stopPropagation(); editProyek('${d.id}', '${p.namaProyek}', '${p.pemberiKerja}', ${p.nilaiProyek})" title="Edit">Edit</button>
+              <button onclick="event.stopPropagation(); if(confirm('Hapus proyek ini?')) deleteDoc(doc(db,'projects','${d.id}'))" title="Hapus" style="color:#dc2626;">Delete</button>
+            </div>
+          ` : ""}
         `;
         list.appendChild(item);
       });
     });
 
-    // Logout
-    window.logout = () => {
-      localStorage.clear();
-      location.href = "index.html";
+    // Edit Proyek (simple prompt)
+    window.editProyek = async (id, nama, pemberi, nilai) => {
+      const newNama = prompt("Nama Proyek", nama);
+      const newPemberi = prompt("Pemberi Kerja", pemberi);
+      const newNilai = prompt("Nilai Proyek", nilai);
+      if (newNama && newPemberi && newNilai) {
+        await updateDoc(doc(db, "projects", id), {
+          namaProyek: newNama, pemberiKerja: newPemberi, nilaiProyek: parseInt(newNilai)
+        });
+        alert("Proyek diperbarui!");
+      }
     };
+
+    window.logout = () => { localStorage.clear(); location.href = "index.html"; };
   </script>
 </body>
 </html>
