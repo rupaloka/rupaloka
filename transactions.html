@@ -7,7 +7,7 @@
   <style>
     body { font-family: 'Segoe UI', Arial, sans-serif; background:#f8fafc; margin:0; padding:20px; }
     .container { max-width: 1000px; margin: auto; background: white; border-radius: 18px; box-shadow: 0 15px 40px rgba(0,0,0,0.1); overflow:hidden; }
-    .header { background: linear-gradient(135deg, #1e11d48, #f43f5e); color:white; padding:30px; text-align:center; position:relative; }
+    .header { background: linear-gradient(135deg, #1e40af, #3b82f6); color:white; padding:30px; text-align:center; position:relative; }
     .header h1 { margin:0; font-size:2.2em; }
     .header .project-name { font-size:1.6em; margin-top:10px; opacity:0.98; font-weight:600; }
     .back-btn { position:absolute; left:25px; top:25px; background:rgba(255,255,255,0.2); color:white; border:none; padding:12px 18px; border-radius:50px; cursor:pointer; font-weight:bold; }
@@ -83,7 +83,10 @@
     <span class="close" onclick="this.closest('.modal').style.display='none'">X</span>
     <h3>Edit Transaksi</h3>
     <input type="date" id="editTanggal" /><br><br>
-    <select id="editTipe"></select><br><br>
+    <select id="editTipe">
+      <option value="debet">Pendapatan (Debet)</option>
+      <option value="kredit">Pengeluaran (Kredit)</option>
+    </select><br><br>
     <select id="editKategori"></select><br><br>
     <input type="text" id="editKeterangan" placeholder="Keterangan" /><br><br>
     <input type="number" id="editJumlah" placeholder="Jumlah" /><br><br>
@@ -169,7 +172,7 @@
   // Format Rupiah
   const rupiah = (n) => new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(n);
 
-  // LOAD TRANSAKSI — INI YANG DIPERBAIKI (sekarang pasti muncul!)
+  // LOAD TRANSAKSI — INI YANG DIPERBAIKI
   const list = document.getElementById("transactionList");
   let q = query(collection(db, "transactions"), where("projectId", "==", projectId), orderBy("tanggal", "desc"), orderBy("createdAt", "desc"));
 
@@ -177,7 +180,7 @@
     q = query(q, where("createdBy", "==", "david"));
   }
 
-  onSnapshot(q, snap => {   // ← PERBAIKAN UTAMA: kurung buka di sini!
+  onSnapshot(q, snap => {
     list.innerHTML = "";
     if (snap.empty) {
       list.innerHTML = "<p style='text-align:center; color:#94a3b8; padding:60px 0; font-size:18px;'>Belum ada transaksi.</p>";
@@ -194,7 +197,6 @@
         <div class="creator">Dibuat: ${t.createdBy} ${t.updatedBy !== t.createdBy ? `• Edit: ${t.updatedBy}` : ""}</div>
       `;
 
-      // Bisa edit kalau admin/fajrin atau pembuatnya sendiri
       item.onclick = () => {
         if (user.role === "admin" || user.username === "fajrin" || user.username === t.createdBy) {
           openEditModal(d.id, t);
@@ -205,11 +207,10 @@
     });
   });
 
-  // Modal Edit & Hapus (sama seperti sebelumnya)
+  // Modal Edit & Hapus
   function openEditModal(id, data) {
     const modal = document.getElementById("editModal");
     document.getElementById("editTanggal").value = data.tanggal;
-    document.getElementById("editTipe").innerHTML = `<option value="debet">Pendapatan (Debet)</option><option value="kredit">Pengeluaran (Kredit)</option>`;
     document.getElementById("editTipe").value = data.tipe;
 
     const editKat = document.getElementById("editKategori");
