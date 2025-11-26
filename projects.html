@@ -5,28 +5,162 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Daftar Proyek - Rupaloka Studio</title>
   <link rel="stylesheet" href="css/style.css" />
+  <style>
+    body { font-family: Arial, sans-serif; background:#f5f7fa; margin:0; padding:20px; }
+    .container { max-width: 900px; margin: auto; background: white; padding: 30px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+    h1 { color: #1a3b8b; margin:0 0 10px 0; }
+    h2 { color: #2c5282; margin:0 0 30px 0; }
+    .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:30px; }
+    .logout-btn { background:#1a3b8b; color:white; padding:12px 28px; border:none; border-radius:8px; cursor:pointer; font-weight:bold; }
+    .logout-btn:hover { background:#132d66; }
+    #formTambahProyek { 
+      display:none; 
+      background:#ebf4ff; 
+      padding:30px; 
+      border-radius:16px; 
+      border:3px solid #3b82f6; 
+      margin-bottom:40px; 
+    }
+    #formTambahProyek h3 { color:#1e40af; margin-top:0; }
+    input { 
+      width:100%; 
+      padding:14px; 
+      margin:10px 0; 
+      border-radius:8px; 
+      border:1px solid #ccc; 
+      font-size:16px; 
+      box-sizing:border-box; 
+    }
+    #btnTambahProyek { 
+      background:#2563eb; 
+      color:white; 
+      padding:16px 40px; 
+      border:none; 
+      border-radius:10px; 
+      font-weight:bold; 
+      font-size:17px; 
+      cursor:pointer; 
+      width:100%; 
+      margin-top:10px; 
+    }
+    #btnTambahProyek:hover { background:#1d4ed8; }
+    #projectList { min-height:100px; }
+  </style>
 </head>
 <body>
   <div class="container">
-    <h1>Rupaloka Studio</h1>
-    <h2>Daftar Proyek</h2>
-    <button onclick="logout()" style="float:right; margin-top:-65px; background:#0066cc; color:white; padding:10px 20px; border:none; border-radius:6px; cursor:pointer;">Logout</button>
-
-    <!-- Form Tambah Proyek (Hanya Admin) -->
-    <div id="formTambahProyek" style="display:none; background:#e3f2fd; padding:25px; border-radius:12px; margin:25px 0; border:3px solid #0066cc;">
-      <h3 style="margin:0 0 15px 0; color:#0066cc;">Tambah Proyek Baru</h3>
-      <input type="text" id="namaProyek" placeholder="Nama Proyek" required style="width:100%; padding:12px; margin:8px 0; border-radius:6px; border:1px solid #ccc;"><br>
-      <input type="text" id="pemberiKerja" placeholder="Pemberi Kerja" required style="width:100%; padding:12px; margin:8px 0; border-radius:6px; border:1px solid #ccc;"><br>
-      <input type="number" id="nilaiProyek" placeholder="Nilai Proyek (contoh: 1500000000)" required style="width:100%; padding:12px; margin:8px 0; border-radius:6px; border:1px solid #ccc;"><br>
-      <button onclick="tambahProyek()" style="background:#0066cc; color:white; padding:14px 30px; border:none; border-radius:6px; font-weight:bold; cursor:pointer; margin-top:10px;">Tambah Proyek</button>
+    <div class="header">
+      <div>
+        <h1>Rupaloka Studio</h1>
+        <h2>Daftar Proyek</h2>
+      </div>
+      <button class="logout-btn" onclick="logout()">Logout</button>
     </div>
 
-    <div id="projectList" style="margin-top:30px;">
-      <p style="text-align:center; color:#888;">Loading proyek...</p>
+    <!-- FORM TAMBAH PROYEK (Hanya untuk admin) -->
+    <div id="formTambahProyek">
+      <h3>Tambah Proyek Baru</h3>
+      <input type="text" id="namaProyek" placeholder="Nama Proyek (contoh: Renovasi Kantin)" required />
+      <input type="text" id="pemberiKerja" placeholder="Pemberi Kerja (contoh: Charitas)" required />
+      <input type="number" id="nilaiProyek" placeholder="Nilai Proyek (contoh: 150000000)" required />
+      <button id="btnTambahProyek">Tambah Proyek</button>
+    </div>
+
+    <!-- DAFTAR PROYEK -->
+    <div id="projectList">
+      <p style="text-align:center; color:#888; padding:50px 0;">Loading proyek...</p>
     </div>
   </div>
 
-  <script type="module" src="js/firebase.js"></script>
-  <script type="module" src="js/projects.js"></script>
+  <!-- Firebase Modular v10 (paling stabil 2025) -->
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js';
+    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, doc, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBiE0oYuXiPNJKC4p7PtfkFeI0sci3BdgI",
+      authDomain: "rupaloka-keuangan.firebaseapp.com",
+      projectId: "rupaloka-keuangan",
+      storageBucket: "rupaloka-keuangan.firebasestorage.app",
+      messagingSenderId: "740474161638",
+      appId: "1:740474161638:web:1b1a62ad204085a8226e27"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Cek login
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (!user) window.location.href = "index.html";
+
+    // Admin → tampilkan form
+    if (user.role === "admin") {
+      document.getElementById("formTambahProyek").style.display = "block";
+    }
+
+    // Format rupiah
+    const rupiah = (n) => new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(n);
+
+    // Tombol Tambah Proyek
+    document.getElementById("btnTambahProyek")?.addEventListener("click", async () => {
+      const nama = document.getElementById("namaProyek").value.trim();
+      const pemberi = document.getElementById("pemberiKerja").value.trim();
+      const nilai = parseInt(document.getElementById("nilaiProyek").value);
+
+      if (!nama || !pemberi || !nilai || nilai <= 0) {
+        alert("Isi semua kolom dengan benar!");
+        return;
+      }
+
+      try {
+        await addDoc(collection(db, "projects"), {
+          namaProyek: nama,
+          pemberiKerja: pemberi,
+          nilaiProyek: nilai,
+          createdAt: new Date()
+        });
+        alert("Proyek berhasil ditambahkan!");
+        document.getElementById("namaProyek").value = "";
+        document.getElementById("pemberiKerja").value = "";
+        document.getElementById("nilaiProyek").value = "";
+      } catch (e) {
+        alert("Gagal: " + e.message);
+      }
+    });
+
+    // Load daftar proyek (real-time)
+    const list = document.getElementById("projectList");
+    const q = query(collection(db, "projects"), orderBy("createdAt", "desc"));
+
+    onSnapshot(q, (snap) => {
+      list.innerHTML = "";
+      if (snap.empty) {
+        list.innerHTML = "<p style='text-align:center; color:#999; padding:60px 0; font-size:18px;'>Belum ada proyek.</p>";
+        return;
+      }
+      snap.forEach((d) => {
+        const p = d.data();
+        const item = document.createElement("div");
+        item.style = "background:white; padding:25px; margin:20px 0; border-radius:14px; box-shadow:0 6px 20px rgba(0,0,0,0.08); border-left:7px solid #2563eb;";
+        item.innerHTML = `
+          <strong style="font-size:1.4em; color:#1e293b;">${p.namaProyek}</strong><br>
+          <small style="color:#64748b;">${p.pemberiKerja} • ${rupiah(p.nilaiProyek)}</small>
+          <div style="margin-top:18px;">
+            <button onclick="location.href='transactions.html?project=${d.id}'" style="padding:12px 24px; background:#2563eb; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold;">
+              ${user.role === "admin" ? "Transaksi" : "Lihat Transaksi"}
+            </button>
+            ${user.role === "admin" ? `<button onclick="if(confirm('Hapus proyek ini?')) deleteDoc(doc(db,'projects','${d.id}')).then(()=>alert('Terhapus!'))" style="margin-left:12px; padding:12px 24px; background:#dc2626; color:white; border:none; border-radius:8px; cursor:pointer;">Hapus</button>` : ""}
+          </div>
+        `;
+        list.appendChild(item);
+      });
+    });
+
+    // Logout
+    window.logout = () => {
+      localStorage.clear();
+      location.href = "index.html";
+    };
+  </script>
 </body>
 </html>
