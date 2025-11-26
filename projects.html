@@ -5,8 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Daftar Proyek - Rupaloka Studio</title>
   <link rel="stylesheet" href="css/style.css" />
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
   <div class="container">
@@ -14,7 +12,7 @@
     <h2>Daftar Proyek</h2>
     <button onclick="logout()" style="float:right; margin-top:-65px; background:#0066cc; color:white; padding:10px 20px; border:none; border-radius:6px; cursor:pointer;">Logout</button>
 
-    <!-- FORM TAMBAH PROYEK (Hanya Admin) -->
+    <!-- Form Tambah Proyek (Hanya Admin) -->
     <div id="formTambahProyek" style="display:none; background:#e3f2fd; padding:25px; border-radius:12px; margin:25px 0; border:3px solid #0066cc;">
       <h3 style="margin:0 0 15px 0; color:#0066cc;">Tambah Proyek Baru</h3>
       <input type="text" id="namaProyek" placeholder="Nama Proyek" required style="width:100%; padding:12px; margin:8px 0; border-radius:6px; border:1px solid #ccc;"><br>
@@ -28,7 +26,7 @@
     </div>
   </div>
 
-  <script src="js/firebase.js"></script>
-  <script src="js/projects.js"></script>
+  <script type="module" src="js/firebase.js"></script>
+  <script type="module" src="js/projects.js"></script>
 </body>
 </html>
