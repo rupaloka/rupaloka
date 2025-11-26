@@ -21,7 +21,7 @@
     button#addBtn { background:#10b981; color:white; padding:18px; border:none; border-radius:14px; font-weight:bold; font-size:18px; cursor:pointer; grid-column: span 4; }
     button#addBtn:hover { background:#059669; }
 
-    .list-section { padding:30px; min-height:300px; }
+    .list-section { padding:30px; min-height:400px; }
     .transaction-item {
       background:white; padding:18px; margin:14px 0; border-radius:14px; border-left:6px solid;
       box-shadow:0 5px 15px rgba(0,0,0,0.06); cursor:pointer; transition:all 0.2s;
@@ -72,7 +72,7 @@
 
   <div class="list-section">
     <div id="transactionList">
-      <p style="text-align:center; color:#94a3b8; padding:60px 0; font-size:18px;">Memuat transaksi...</p>
+      <p style="text-align:center; color:#94a3b8; padding:80px 0; font-size:18px;">Memuat transaksi...</p>
     </div>
   </div>
 </div>
@@ -119,38 +119,31 @@
   if (!projectId) window.location.href = "projects.html";
 
   // Nama Proyek
-  const projectNameEl = document.getElementById("projectName");
   getDoc(doc(db, "projects", projectId)).then(snap => {
-    if (snap.exists()) projectNameEl.textContent = snap.data().namaProyek;
+    if (snap.exists()) document.getElementById("projectName").textContent = snap.data().namaProyek;
   });
 
   // Kategori
   const kategoriDebet = ["Pembayaran Termin", "Pendapatan lainnya"];
   const kategoriKredit = ["Gaji Tukang", "Material dan Alat", "Operasional", "Pengeluaran lain"];
 
-  const tipeSelect = document.getElementById("tipe");
-  const kategoriSelect = document.getElementById("kategori");
-
-  tipeSelect.addEventListener("change", () => {
-    kategoriSelect.innerHTML = '<option value="">Pilih Kategori</option>';
-    kategoriSelect.disabled = false;
-    const options = tipeSelect.value === "debet" ? kategoriDebet : kategoriKredit;
-    options.forEach(opt => {
-      const o = document.createElement("option");
-      o.value = opt; o.textContent = opt;
-      kategoriSelect.appendChild(o);
-    });
+  document.getElementById("tipe").addEventListener("change", function() {
+    const kat = document.getElementById("kategori");
+    kat.innerHTML = '<option value="">Pilih Kategori</option>';
+    kat.disabled = false;
+    const opts = this.value === "debet" ? kategoriDebet : kategoriKredit;
+    opts.forEach(o => kat.add(new Option(o, o)));
   });
 
   // Tambah Transaksi
-  document.getElementById("addBtn").addEventListener("click", async () => {
+  document.getElementById("addBtn").onclick = async () => {
     const tanggal = document.getElementById("tanggal").value;
-    const tipe = tipeSelect.value;
-    const kategori = kategoriSelect.value;
+    const tipe = document.getElementById("tipe").value;
+    const kategori = document.getElementById("kategori").value;
     const keterangan = document.getElementById("keterangan").value.trim();
     const jumlah = parseInt(document.getElementById("jumlah").value);
 
-    if (!tanggal || !tipe || !kategori || !jumlah) return alert("Lengkapi semua kolom wajib!");
+    if (!tanggal || !tipe || !kategori || !jumlah) return alert("Lengkapi semua kolom!");
 
     await addDoc(collection(db, "transactions"), {
       projectId, tanggal, tipe, kategori,
@@ -164,26 +157,30 @@
 
     alert("Transaksi berhasil ditambahkan!");
     document.getElementById("tanggal").value = new Date().toISOString().split('T')[0];
-    tipeSelect.value = ""; kategoriSelect.disabled = true; kategoriSelect.innerHTML = '<option value="">Pilih Kategori</option>';
+    document.getElementById("tipe").value = "";
+    document.getElementById("kategori").disabled = true;
+    document.getElementById("kategori").innerHTML = '<option value="">Pilih Kategori</option>';
     document.getElementById("keterangan").value = "";
     document.getElementById("jumlah").value = "";
-  });
+  };
 
   // Format Rupiah
-  const rupiah = (n) => new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(n);
+  const rupiah = n => new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(n);
 
-  // LOAD TRANSAKSI — INI YANG DIPERBAIKI
+  // LOAD TRANSAKSI
   const list = document.getElementById("transactionList");
-  let q = query(collection(db, "transactions"), where("projectId", "==", projectId), orderBy("tanggal", "desc"), orderBy("createdAt", "desc"));
 
+  let constraints = [where("projectId", "==", projectId)];
   if (user.username === "david") {
-    q = query(q, where("createdBy", "==", "david"));
+    constraints.push(where("createdBy", "==", "david"));
   }
+
+  const q = query(collection(db, "transactions"), ...constraints, orderBy("tanggal", "desc"), orderBy("createdAt", "desc"));
 
   onSnapshot(q, snap => {
     list.innerHTML = "";
     if (snap.empty) {
-      list.innerHTML = "<p style='text-align:center; color:#94a3b8; padding:60px 0; font-size:18px;'>Belum ada transaksi.</p>";
+      list.innerHTML = "<p style='text-align:center; color:#94a3b8; padding:80px 0; font-size:18px;'>Belum ada transaksi.</p>";
       return;
     }
 
@@ -194,14 +191,12 @@
       item.innerHTML = `
         <div class="main-text">${t.tipe === "debet" ? "Debet" : "Kredit"} | ${t.kategori} | ${t.keterangan} | ${rupiah(t.jumlah)}</div>
         <div class="sub-text">${new Date(t.tanggal).toLocaleDateString("id-ID", { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</div>
-        <div class="creator">Dibuat: ${t.createdBy} ${t.updatedBy !== t.createdBy ? `• Edit: ${t.updatedBy}` : ""}</div>
+        <div class="creator">Dibuat: ${t.createdBy}${t.updatedBy !== t.createdBy ? ` • Edit: ${t.updatedBy}` : ""}</div>
       `;
 
-      item.onclick = () => {
-        if (user.role === "admin" || user.username === "fajrin" || user.username === t.createdBy) {
-          openEditModal(d.id, t);
-        }
-      };
+      if (user.role === "admin" || user.username === "fajrin" || user.username === t.createdBy) {
+        item.onclick = () => openEditModal(d.id, t);
+      }
 
       list.appendChild(item);
     });
@@ -213,19 +208,14 @@
     document.getElementById("editTanggal").value = data.tanggal;
     document.getElementById("editTipe").value = data.tipe;
 
-    const editKat = document.getElementById("editKategori");
-    editKat.innerHTML = "";
-    const opts = data.tipe === "debet" ? kategoriDebet : kategoriKredit;
-    opts.forEach(o => {
-      const opt = document.createElement("option");
-      opt.value = o; opt.textContent = o;
-      if (o === data.kategori) opt.selected = true;
-      editKat.appendChild(opt);
+    const kat = document.getElementById("editKategori");
+    kat.innerHTML = "";
+    (data.tipe === "debet" ? kategoriDebet : kategoriKredit).forEach(o => {
+      kat.add(new Option(o, o, false, o === data.kategori));
     });
 
     document.getElementById("editKeterangan").value = data.keterangan;
     document.getElementById("editJumlah").value = data.jumlah;
-
     modal.style.display = "flex";
 
     document.getElementById("saveEdit").onclick = async () => {
@@ -247,13 +237,11 @@
           await deleteDoc(doc(db, "transactions", id));
           modal.style.display = "none";
         }
-      } else {
-        alert("Hanya Admin & Fajrin yang bisa hapus.");
-      }
+      } else alert("Hanya Admin & Fajrin yang bisa hapus.");
     };
   }
 
-  // Tanggal default
+  // Default tanggal hari ini
   document.getElementById("tanggal").value = new Date().toISOString().split('T')[0];
 </script>
 </body>
