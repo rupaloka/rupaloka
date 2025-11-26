@@ -2,30 +2,33 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <title>Daftar Proyek</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Daftar Proyek - Rupaloka Studio</title>
   <link rel="stylesheet" href="css/style.css" />
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
   <div class="container">
-    <h1>Daftar Proyek</h1>
-    <button onclick="window.location.href='transactions.html'">Ke Transaksi</button>
+    <h1>Rupaloka Studio</h1>
+    <h2>Daftar Proyek</h2>
     <button onclick="logout()">Logout</button>
 
-    <div id="admin-only" style="display:none; margin-top:20px;">
-      <h3>Tambah Proyek Baru (Admin Only)</h3>
-      <input type="text" id="newProject" placeholder="Nama Proyek" />
-      <button onclick="addProject()">Tambah</button>
+    <!-- Form Tambah Proyek (Admin Only) -->
+    <div id="admin-form" style="display:none; background:#f0f8ff; padding:20px; border-radius:10px; margin:20px 0;">
+      <h3>Tambah Proyek Baru</h3>
+      <input type="text" id="namaProyek" placeholder="Nama Proyek" required /><br><br>
+      <input type="text" id="pemberiKerja" placeholder="Nama Pemberi Kerja" required /><br><br>
+      <input type="number" id="nilaiProyek" placeholder="Nilai Proyek (angka saja)" required /><br><br>
+      <input type="date" id="mulaiProyek" required /> <strong>s/d</strong>
+      <input type="date" id="selesaiProyek" required /><br><br>
+      <button onclick="tambahProyek()">Tambah Proyek</button>
     </div>
 
-    <ul id="projectList"></ul>
+    <div id="projectList"></div>
   </div>
 
   <script src="js/firebase.js"></script>
   <script src="js/projects.js"></script>
-  <script>
-    const user = JSON.parse(localStorage.getItem("user"));
-    if (!user) window.location.href = "index.html";
-    if (user.role === "admin") document.getElementById("admin-only").style.display = "block";
-  </script>
 </body>
 </html>
