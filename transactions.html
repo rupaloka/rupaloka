@@ -12,6 +12,8 @@
     .project-name{font-size:1.6em;margin-top:10px;font-weight:600;}
     .back-btn{position:absolute;left:20px;top:20px;background:rgba(255,255,255,.2);color:#fff;border:none;padding:10px 18px;border-radius:50px;cursor:pointer;transition:.3s;}
     .back-btn:hover{background:rgba(255,255,255,.4);}
+    .print-btn{position:absolute;right:20px;top:20px;background:#f97316;color:#fff;border:none;padding:10px 18px;border-radius:50px;cursor:pointer;transition:.3s;font-size:14px;}
+    .print-btn:hover{background:#ea580c;}
     .form-section{padding:30px;background:#f8fafc;}
     .grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:16px;margin-bottom:20px;align-items:end;}
     @media(max-width:768px){.grid{grid-template-columns:1fr;}}
@@ -40,6 +42,7 @@
 <div class="container">
   <div class="header">
     <button class="back-btn" onclick="history.back()">Back</button>
+    <button class="print-btn" onclick="printReport()">Cetak</button>
     <h1>Transaksi Proyek</h1>
     <div class="project-name" id="projectName">Loading...</div>
   </div>
@@ -89,7 +92,10 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
-  import { getFirestore, collection, addDoc, query, where, orderBy, onSnapshot, doc, getDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+  import { 
+    getFirestore, collection, addDoc, query, where, orderBy, onSnapshot, 
+    doc, getDoc, updateDoc, deleteDoc 
+  } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyBiE0oYuXiPNJKC4p7PtfkFeI0sci3BdgI",
@@ -103,47 +109,45 @@
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
-  // Cek login
-  const user = JSON.parse(localStorage.getItem("user") || "null");
-  if (!user) location.href = "index.html";
+  const urlParams = new URLSearchParams(window.location.search);
+  const projectId = urlParams.get('project');
+  const user = JSON.parse(localStorage.getItem("user")) || null;
 
-  const params = new URLSearchParams(location.search);
-  const projectId = params.get("project");
-  if (!projectId) location.href = "projects.html";
+  if (!projectId || !user) window.location.href = "index.html";
 
-  // Tampilkan nama proyek
-  getDoc(doc(db, "projects", projectId)).then(snap => {
-    if (snap.exists()) document.getElementById("projectName").textContent = snap.data().namaProyek;
+  // Format Rupiah
+  const rp = (n) => new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(n);
+
+  // Load nama proyek
+  getDoc(doc(db, "projects", projectId)).then(d => {
+    if (d.exists()) {
+      document.getElementById("projectName").textContent = d.data().namaProyek;
+    }
   });
 
   // Kategori
-  const debetOpts  = ["Pembayaran Termin", "Pendapatan lainnya"];
-  const kreditOpts = ["Gaji Tukang", "Material dan Alat", "Operasional", "Pengeluaran lain"];
+  const debetOpts = ["Pembayaran Termin", "Pembayaran Lain", "Pinjaman Masuk", "Lain-lain"];
+  const kreditOpts = ["Gaji", "Material", "Operasional", "Transport", "Lain-lain"];
 
-  document.getElementById("tipe").addEventListener("change", function() {
+  // Ganti kategori saat tipe berubah
+  document.getElementById("tipe").onchange = function() {
     const kat = document.getElementById("kategori");
     kat.innerHTML = "<option value=''>Kategori</option>";
-    kat.disabled = false;
     const opts = this.value === "debet" ? debetOpts : kreditOpts;
     opts.forEach(o => kat.add(new Option(o, o)));
-  });
-
-  // Format Rupiah
-  const rp = n => new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(n);
-
-  // Tanggal hari ini
-  document.getElementById("tanggal").value = new Date().toISOString().split("T")[0];
+    kat.disabled = false;
+  };
 
   // Tambah transaksi
-  document.getElementById("addBtn").addEventListener("click", async () => {
+  document.getElementById("addBtn").onclick = async () => {
     const tanggal = document.getElementById("tanggal").value;
-    const tipe    = document.getElementById("tipe").value;
-    const kategori= document.getElementById("kategori").value;
+    const tipe = document.getElementById("tipe").value;
+    const kategori = document.getElementById("kategori").value;
     const keterangan = document.getElementById("keterangan").value.trim() || "-";
-    const jumlah  = parseInt(document.getElementById("jumlah").value);
+    const jumlah = parseInt(document.getElementById("jumlah").value);
 
     if (!tanggal || !tipe || !kategori || !jumlah) {
-      alert("Harap lengkapi semua field yang wajib!");
+      alert("Lengkapi semua kolom!");
       return;
     }
 
@@ -167,20 +171,21 @@
       document.getElementById("tipe").value = "";
       document.getElementById("kategori").innerHTML = "<option value=''>Kategori</option>";
       document.getElementById("kategori").disabled = true;
+      document.getElementById("tanggal").valueAsDate = new Date();
     } catch (e) {
       console.error(e);
       alert("Gagal menambah transaksi.");
     }
-  });
+  };
 
-  // LIST TRANSAKSI — FIX 100%
+  // LIST TRANSAKSI
   const listDiv = document.getElementById("list");
 
   const q = query(
     collection(db, "transactions"),
     where("projectId", "==", projectId),
-    orderBy("tanggal", "desc"),      // urut berdasarkan tanggal transaksi
-    orderBy("createdAt", "desc")     // urut jam kalau tanggal sama
+    orderBy("tanggal", "desc"),
+    orderBy("createdAt", "desc")
   );
 
   onSnapshot(q, (snapshot) => {
@@ -200,7 +205,6 @@
         <div class="creator">Dibuat: ${t.createdBy}${t.updatedBy && t.updatedBy !== t.createdBy ? " • Edit: " + t.updatedBy : ""}</div>
       `;
 
-      // Hanya admin / fajrin / pembuat yang boleh edit & hapus
       const canEdit = user.role === "admin" || user.username === "fajrin" || user.username === t.createdBy;
       if (canEdit) {
         item.style.cursor = "pointer";
@@ -209,9 +213,6 @@
 
       listDiv.appendChild(item);
     });
-  }, (error) => {
-    console.error("Error loading transactions:", error);
-    listDiv.innerHTML = `<p style="color:red;text-align:center;">Gagal memuat transaksi.<br>Kemungkinan perlu membuat index di Firestore.<br><small>${error.message}</small></p>`;
   });
 
   // Modal Edit
@@ -229,11 +230,10 @@
     const opts = data.tipe === "debet" ? debetOpts : kreditOpts;
     opts.forEach(o => ek.add(new Option(o, o, false, o === data.kategori)));
 
-    // Ganti kategori saat tipe diubah di modal
     document.getElementById("e_tipe").onchange = function() {
       ek.innerHTML = "";
       const newOpts = this.value === "debet" ? debetOpts : kreditOpts;
-      newOpts.forEach(o => ek.add(new Option(o, o, false, o === data.kategori)));
+      newOpts.forEach(o => ek.add(new Option(o, o)));
     };
 
     document.getElementById("modal").style.display = "flex";
@@ -244,7 +244,6 @@
     currentDocId = null;
   }
 
-  // Update
   document.getElementById("save").onclick = async () => {
     if (!currentDocId) return;
 
@@ -262,7 +261,6 @@
     closeModal();
   };
 
-  // Hapus
   document.getElementById("hapus").onclick = async () => {
     if (!currentDocId) return;
     if (!confirm("Yakin ingin menghapus transaksi ini?")) return;
@@ -277,10 +275,17 @@
     closeModal();
   };
 
-  // Tutup modal kalau klik luar
   window.onclick = e => {
     if (e.target === document.getElementById("modal")) closeModal();
   };
+
+  // TOMBOL CETAK
+  window.printReport = () => {
+    window.open(`report.html?project=${projectId}`, '_blank');
+  };
+
+  // Set tanggal hari ini
+  document.getElementById("tanggal").valueAsDate = new Date();
 </script>
 </body>
 </html>
