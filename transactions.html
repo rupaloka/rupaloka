@@ -42,7 +42,7 @@
 <div class="container">
   <div class="header">
     <button class="back-btn" onclick="history.back()">Back</button>
-    <button class="print-btn" onclick="printReport()">Cetak</button>
+    <button class="print-btn" id="printBtn">Cetak</button>
     <h1>Transaksi Proyek</h1>
     <div class="project-name" id="projectName">Loading...</div>
   </div>
@@ -115,7 +115,6 @@
 
   if (!projectId || !user) window.location.href = "index.html";
 
-  // Format Rupiah
   const rp = (n) => new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(n);
 
   // Load nama proyek
@@ -125,11 +124,14 @@
     }
   });
 
-  // Kategori
+  // === KHUSUS DAVID: Sembunyikan tombol cetak & batasi data ===
+  if (user.username === "david") {
+    document.getElementById("printBtn").style.display = "none";
+  }
+
   const debetOpts = ["Pembayaran Termin", "Pembayaran Lain", "Pinjaman Masuk", "Lain-lain"];
   const kreditOpts = ["Gaji", "Material", "Operasional", "Transport", "Lain-lain"];
 
-  // Ganti kategori saat tipe berubah
   document.getElementById("tipe").onchange = function() {
     const kat = document.getElementById("kategori");
     kat.innerHTML = "<option value=''>Kategori</option>";
@@ -138,7 +140,6 @@
     kat.disabled = false;
   };
 
-  // Tambah transaksi
   document.getElementById("addBtn").onclick = async () => {
     const tanggal = document.getElementById("tanggal").value;
     const tipe = document.getElementById("tipe").value;
@@ -178,15 +179,26 @@
     }
   };
 
-  // LIST TRANSAKSI
-  const listDiv = document.getElementById("list");
+  // Query: David hanya lihat transaksi buatannya sendiri
+  let q;
+  if (user.username === "david") {
+    q = query(
+      collection(db, "transactions"),
+      where("projectId", "==", projectId),
+      where("createdBy", "==", "david"),
+      orderBy("tanggal", "desc"),
+      orderBy("createdAt", "desc")
+    );
+  } else {
+    q = query(
+      collection(db, "transactions"),
+      where("projectId", "==", projectId),
+      orderBy("tanggal", "desc"),
+      orderBy("createdAt", "desc")
+    );
+  }
 
-  const q = query(
-    collection(db, "transactions"),
-    where("projectId", "==", projectId),
-    orderBy("tanggal", "desc"),
-    orderBy("createdAt", "desc")
-  );
+  const listDiv = document.getElementById("list");
 
   onSnapshot(q, (snapshot) => {
     listDiv.innerHTML = "";
@@ -215,7 +227,7 @@
     });
   });
 
-  // Modal Edit
+  // Modal Edit & Hapus (tetap sama)
   let currentDocId = null;
 
   function openEditModal(docId, data) {
@@ -279,12 +291,12 @@
     if (e.target === document.getElementById("modal")) closeModal();
   };
 
-  // TOMBOL CETAK
-  window.printReport = () => {
+  // Tombol Cetak
+  document.getElementById("printBtn").onclick = () => {
     window.open(`report.html?project=${projectId}`, '_blank');
   };
 
-  // Set tanggal hari ini
+  // Default tanggal hari ini
   document.getElementById("tanggal").valueAsDate = new Date();
 </script>
 </body>
