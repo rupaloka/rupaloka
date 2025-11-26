@@ -1,9 +1,8 @@
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+// firebase.js — VERSI COMPAT (WAJIB untuk kode lama yang sudah saya kasih)
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+import "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js";
 
-// Your web app's Firebase configuration
+// Config kamu (sudah benar)
 const firebaseConfig = {
   apiKey: "AIzaSyBiE0oYuXiPNJKC4p7PtfkFeI0sci3BdgI",
   authDomain: "rupaloka-keuangan.firebaseapp.com",
@@ -15,3 +14,8 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
+
+// Ini yang bikin semua kode lama jalan
+const db = firebase.firestore();
+
+console.log("Firebase berhasil diinisialisasi!");
