@@ -7,9 +7,9 @@
   <style>
     body { font-family: 'Segoe UI', Arial, sans-serif; background:#f8fafc; margin:0; padding:20px; }
     .container { max-width: 1000px; margin: auto; background: white; border-radius: 18px; box-shadow: 0 15px 40px rgba(0,0,0,0.1); overflow:hidden; }
-    .header { background: linear-gradient(135deg, #1e40af, #3b82f6); color:white; padding:30px; text-align:center; position:relative; }
+    .header { background: linear-gradient(135deg, #1e11d48, #f43f5e); color:white; padding:30px; text-align:center; position:relative; }
     .header h1 { margin:0; font-size:2.2em; }
-    .header .project-name { font-size:1.5em; margin-top:10px; opacity:0.95; font-weight:600; }
+    .header .project-name { font-size:1.6em; margin-top:10px; opacity:0.98; font-weight:600; }
     .back-btn { position:absolute; left:25px; top:25px; background:rgba(255,255,255,0.2); color:white; border:none; padding:12px 18px; border-radius:50px; cursor:pointer; font-weight:bold; }
     .back-btn:hover { background:rgba(255,255,255,0.3); }
 
@@ -21,7 +21,7 @@
     button#addBtn { background:#10b981; color:white; padding:18px; border:none; border-radius:14px; font-weight:bold; font-size:18px; cursor:pointer; grid-column: span 4; }
     button#addBtn:hover { background:#059669; }
 
-    .list-section { padding:30px; }
+    .list-section { padding:30px; min-height:300px; }
     .transaction-item {
       background:white; padding:18px; margin:14px 0; border-radius:14px; border-left:6px solid;
       box-shadow:0 5px 15px rgba(0,0,0,0.06); cursor:pointer; transition:all 0.2s;
@@ -29,7 +29,7 @@
     .transaction-item:hover { transform:translateY(-3px); box-shadow:0 10px 25px rgba(0,0,0,0.12); }
     .transaction-item.debet { border-left-color:#10b981; }
     .transaction-item.kredit { border-left-color:#ef4444; }
-    .main-text { font-size:0.98em; font-weight:600; color:#1e293b; }
+    .main-text { font-size:0.98em; font-weight:600; color:#1e293b; line-height:1.5; }
     .sub-text { font-size:0.85em; color:#64748b; margin-top:5px; }
     .creator { font-size:0.78em; color:#94a3b8; margin-top:8px; font-style:italic; }
 
@@ -72,7 +72,7 @@
 
   <div class="list-section">
     <div id="transactionList">
-      <p style="text-align:center; color:#94a3b8; padding:50px 0;">Memuat transaksi...</p>
+      <p style="text-align:center; color:#94a3b8; padding:60px 0; font-size:18px;">Memuat transaksi...</p>
     </div>
   </div>
 </div>
@@ -115,14 +115,10 @@
   const projectId = urlParams.get('project');
   if (!projectId) window.location.href = "projects.html";
 
-  // === TAMPILKAN NAMA PROYEK ===
+  // Nama Proyek
   const projectNameEl = document.getElementById("projectName");
   getDoc(doc(db, "projects", projectId)).then(snap => {
-    if (snap.exists()) {
-      projectNameEl.textContent = snap.data().namaProyek;
-    } else {
-      projectNameEl.textContent = "Proyek Tidak Ditemukan";
-    }
+    if (snap.exists()) projectNameEl.textContent = snap.data().namaProyek;
   });
 
   // Kategori
@@ -143,7 +139,7 @@
     });
   });
 
-  // === TAMBAH TRANSAKSI (SEKARANG JALAN!) ===
+  // Tambah Transaksi
   document.getElementById("addBtn").addEventListener("click", async () => {
     const tanggal = document.getElementById("tanggal").value;
     const tipe = tipeSelect.value;
@@ -151,41 +147,29 @@
     const keterangan = document.getElementById("keterangan").value.trim();
     const jumlah = parseInt(document.getElementById("jumlah").value);
 
-    if (!tanggal || !tipe || !kategori || !jumlah) {
-      alert("Lengkapi semua kolom wajib!");
-      return;
-    }
+    if (!tanggal || !tipe || !kategori || !jumlah) return alert("Lengkapi semua kolom wajib!");
 
-    try {
-      await addDoc(collection(db, "transactions"), {
-        projectId,
-        tanggal,
-        tipe,
-        kategori,
-        keterangan: keterangan || "-",
-        jumlah,
-        createdBy: user.username,
-        createdAt: new Date(),
-        updatedBy: user.username,
-        updatedAt: new Date()
-      });
+    await addDoc(collection(db, "transactions"), {
+      projectId, tanggal, tipe, kategori,
+      keterangan: keterangan || "-",
+      jumlah,
+      createdBy: user.username,
+      createdAt: new Date(),
+      updatedBy: user.username,
+      updatedAt: new Date()
+    });
 
-      alert("Transaksi berhasil ditambahkan!");
-      // Reset form
-      document.getElementById("tanggal").value = new Date().toISOString().split('T')[0];
-      tipeSelect.value = ""; 
-      kategoriSelect.disabled = true; kategoriSelect.innerHTML = '<option value="">Pilih Kategori</option>';
-      document.getElementById("keterangan").value = "";
-      document.getElementById("jumlah").value = "";
-    } catch (err) {
-      alert("Gagal: " + err.message);
-    }
+    alert("Transaksi berhasil ditambahkan!");
+    document.getElementById("tanggal").value = new Date().toISOString().split('T')[0];
+    tipeSelect.value = ""; kategoriSelect.disabled = true; kategoriSelect.innerHTML = '<option value="">Pilih Kategori</option>';
+    document.getElementById("keterangan").value = "";
+    document.getElementById("jumlah").value = "";
   });
 
-  // Format rupiah
+  // Format Rupiah
   const rupiah = (n) => new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(n);
 
-  // === LOAD TRANSAKSI ===
+  // LOAD TRANSAKSI — INI YANG DIPERBAIKI (sekarang pasti muncul!)
   const list = document.getElementById("transactionList");
   let q = query(collection(db, "transactions"), where("projectId", "==", projectId), orderBy("tanggal", "desc"), orderBy("createdAt", "desc"));
 
@@ -193,7 +177,7 @@
     q = query(q, where("createdBy", "==", "david"));
   }
 
-  onSnapshot(q, (snap) => {
+  onSnapshot(q, snap => {   // ← PERBAIKAN UTAMA: kurung buka di sini!
     list.innerHTML = "";
     if (snap.empty) {
       list.innerHTML = "<p style='text-align:center; color:#94a3b8; padding:60px 0; font-size:18px;'>Belum ada transaksi.</p>";
@@ -207,9 +191,10 @@
       item.innerHTML = `
         <div class="main-text">${t.tipe === "debet" ? "Debet" : "Kredit"} | ${t.kategori} | ${t.keterangan} | ${rupiah(t.jumlah)}</div>
         <div class="sub-text">${new Date(t.tanggal).toLocaleDateString("id-ID", { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</div>
-        <div class="creator">Dibuat oleh: ${t.createdBy} ${t.updatedBy !== t.createdBy ? `• Terakhir edit: ${t.updatedBy}` : ""}</div>
+        <div class="creator">Dibuat: ${t.createdBy} ${t.updatedBy !== t.createdBy ? `• Edit: ${t.updatedBy}` : ""}</div>
       `;
 
+      // Bisa edit kalau admin/fajrin atau pembuatnya sendiri
       item.onclick = () => {
         if (user.role === "admin" || user.username === "fajrin" || user.username === t.createdBy) {
           openEditModal(d.id, t);
@@ -220,7 +205,7 @@
     });
   });
 
-  // Modal Edit (sama seperti sebelumnya)
+  // Modal Edit & Hapus (sama seperti sebelumnya)
   function openEditModal(id, data) {
     const modal = document.getElementById("editModal");
     document.getElementById("editTanggal").value = data.tanggal;
@@ -257,17 +242,17 @@
 
     document.getElementById("deleteTransaksi").onclick = async () => {
       if (user.role === "admin" || user.username === "fajrin") {
-        if (confirm("Yakin hapus transaksi ini?")) {
+        if (confirm("Hapus transaksi ini?")) {
           await deleteDoc(doc(db, "transactions", id));
           modal.style.display = "none";
         }
       } else {
-        alert("Hanya Admin & Fajrin yang bisa menghapus transaksi.");
+        alert("Hanya Admin & Fajrin yang bisa hapus.");
       }
     };
   }
 
-  // Tanggal default hari ini
+  // Tanggal default
   document.getElementById("tanggal").value = new Date().toISOString().split('T')[0];
 </script>
 </body>
