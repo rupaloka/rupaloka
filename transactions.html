@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <title>Transaksi Keuangan</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1 id="projectName">Loading...</h1>
+    <button onclick="window.location.href='projects.html'">Kembali</button>
+    <button onclick="logout()">Logout</button>
+
+    <!-- Tombol Cetak Laporan (hanya admin & fajrin) -->
+    <div id="printBtn" style="display:none; margin:20px 0;">
+      <button onclick="printReport()">Cetak Laporan Keuangan</button>
+    </div>
+
+    <h2>Input Transaksi</h2>
+    <select id="type"><option>Debet</option><option>Kredit</option></select>
+    <input type="date" id="date" />
+    <input type="text" id="desc" placeholder="Keterangan" />
+    <input type="number" id="amount" placeholder="Jumlah (tanpa titik)" />
+    <button onclick="addTransaction()">Simpan</button>
+
+    <h2>History Transaksi</h2>
+    <div id="history"></div>
+  </div>
+
+  <script src="js/firebase.js"></script>
+  <script src="js/transactions.js"></script>
+</body>
+</html>

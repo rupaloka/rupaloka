@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <title>Daftar Proyek</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Daftar Proyek</h1>
+    <button onclick="window.location.href='transactions.html'">Ke Transaksi</button>
+    <button onclick="logout()">Logout</button>
+
+    <div id="admin-only" style="display:none; margin-top:20px;">
+      <h3>Tambah Proyek Baru (Admin Only)</h3>
+      <input type="text" id="newProject" placeholder="Nama Proyek" />
+      <button onclick="addProject()">Tambah</button>
+    </div>
+
+    <ul id="projectList"></ul>
+  </div>
+
+  <script src="js/firebase.js"></script>
+  <script src="js/projects.js"></script>
+  <script>
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (!user) window.location.href = "index.html";
+    if (user.role === "admin") document.getElementById("admin-only").style.display = "block";
+  </script>
+</body>
+</html>
