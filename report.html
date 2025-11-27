@@ -90,8 +90,8 @@
     <strong>Pendapatan :</strong>
     <table>
       <tr><td class="label">Pembayaran Termin</td><td class="value" id="termin">Rp 0</td></tr>
-      <tr><td class="label">Pembayaran Lain-lain</td><td class="value" id="lainDebet">Rp 0</td></tr>
-      <tr><td class="label">Lain-Lain</td><td class="value" id="lainDebetExtra">Rp 0</td></tr>
+      <!-- BARIS "Pembayaran Lain-lain" SUDAH DIHAPUS -->
+      <tr><td class="label">Lain-lain</td><td class="value" id="lainDebet">Rp 0</td></tr>
       <tr><td class="total">Total Pendapatan</td><td class="value total" id="totalPendapatan">Rp 0</td></tr>
     </table>
   </div>
@@ -114,9 +114,7 @@
     </tr>
   </table>
 </div>
-<!-- AKHIR KOTAK HITAM -->
 
-<!-- HISTORY DIPINDAH KE SINI (di luar kotak) -->
 <div class="history">
   <h3>History Transaksi</h3>
   <div id="historyList"></div>
@@ -177,16 +175,13 @@
 
     if (t.tipe === "debet") {
       if (t.kategori === "Pembayaran Termin") totals.termin += t.jumlah;
-      else if (t.kategori === "Pembayaran Lain") totals.lainDebet += t.jumlah;
-      else totals.lainDebet += t.jumlah;
-
+      else totals.lainDebet += t.jumlah;   // semua selain Termin masuk ke Lain-lain
       line.innerHTML = `<span class="debet">Debet</span> | ${date} | ${t.kategori}${keterangan} | ${rp(t.jumlah)}`;
     } else {
       if (t.kategori === "Gaji") totals.gaji += t.jumlah;
       else if (t.kategori === "Material") totals.material += t.jumlah;
       else if (t.kategori === "Operasional") totals.operasional += t.jumlah;
       else totals.lainKredit += t.jumlah;
-
       line.innerHTML = `<span class="kredit">Kredit</span> | ${date} | ${t.kategori}${keterangan} | ${rp(t.jumlah)}`;
     }
     historyList.appendChild(line);
@@ -194,8 +189,6 @@
 
   document.getElementById("termin").textContent = rp(totals.termin);
   document.getElementById("lainDebet").textContent = rp(totals.lainDebet);
-  document.getElementById("lainDebetExtra").textContent = rp(0);
-
   document.getElementById("gaji").textContent = rp(totals.gaji);
   document.getElementById("material").textContent = rp(totals.material);
   document.getElementById("operasional").textContent = rp(totals.operasional);
@@ -203,12 +196,4 @@
 
   const totalPendapatan = totals.termin + totals.lainDebet;
   const totalPengeluaran = totals.gaji + totals.material + totals.operasional + totals.lainKredit;
-  const untungRugi = totalPendapatan - totalPengeluaran;
-
-  document.getElementById("totalPendapatan").textContent = rp(totalPendapatan);
-  document.getElementById("totalPengeluaran").textContent = rp(totalPengeluaran);
-  document.getElementById("untungRugi").textContent = rp(untungRugi);
-  document.getElementById("untungRugi").style.color = untungRugi >= 0 ? "green" : "red";
-</script>
-</body>
-</html>
+  const untungRugi = totalPend
