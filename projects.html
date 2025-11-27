@@ -49,17 +49,20 @@
       <button class="logout-btn" onclick="logout()">Logout</button>
     </div>
 
-    <button onclick="document.getElementById('formTambahProyek').style.display='block'" 
-            style="background:#10b981;color:white;padding:14px 30px;border:none;border-radius:10px;font-size:16px;cursor:pointer;">
-      + Tambah Proyek Baru
-    </button>
+    <!-- HANYA ADMIN YANG BISA LIHAT TOMBOL & FORM TAMBAH PROYEK -->
+    <div id="adminOnlySection" style="display:none;">
+      <button onclick="document.getElementById('formTambahProyek').style.display='block'" 
+              style="background:#10b981;color:white;padding:14px 30px;border:none;border-radius:10px;font-size:16px;cursor:pointer;">
+        + Tambah Proyek Baru
+      </button>
 
-    <div id="formTambahProyek">
-      <h3 style="color:#1e40af; margin-top:0;">Tambah Proyek Baru</h3>
-      <input type="text" id="namaProyek" placeholder="Nama Proyek" required />
-      <input type="text" id="pemberiKerja" placeholder="Pemberi Kerja" required />
-      <input type="number" id="nilaiProyek" placeholder="Nilai Proyek (contoh: 100000000)" required />
-      <button id="btnTambahProyek">Tambah Proyek</button>
+      <div id="formTambahProyek">
+        <h3 style="color:#1e40af; margin-top:0;">Tambah Proyek Baru</h3>
+        <input type="text" id="namaProyek" placeholder="Nama Proyek" required />
+        <input type="text" id="pemberiKerja" placeholder="Pemberi Kerja" required />
+        <input type="number" id="nilaiProyek" placeholder="Nilai Proyek (contoh: 100000000)" required />
+        <button id="btnTambahProyek">Tambah Proyek</button>
+      </div>
     </div>
 
     <div id="projectList">
@@ -86,9 +89,14 @@
   const user = JSON.parse(localStorage.getItem("user") || "{}");
   if (!user.username) location.href = "index.html";
 
+  // BARIS INI YANG BARU: cuma admin yang boleh tambah proyek
+  if (user.role === "admin") {
+    document.getElementById("adminOnlySection").style.display = "block";
+  }
+
   const rupiah = (n) => new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(n);
 
-  // Tambah Proyek
+  // Tambah Proyek (tetap sama)
   document.getElementById("btnTambahProyek")?.addEventListener("click", async () => {
     const nama = document.getElementById("namaProyek").value.trim();
     const pemberi = document.getElementById("pemberiKerja").value.trim();
@@ -104,7 +112,7 @@
     document.getElementById("nilaiProyek").value = "";
   });
 
-  // Load Proyek
+  // Load Proyek (tetap sama)
   const list = document.getElementById("projectList");
   const q = query(collection(db, "projects"), orderBy("createdAt", "desc"));
   onSnapshot(q, (snap) => {
@@ -133,7 +141,6 @@
     });
   });
 
-  // PERBAIKEAN UTAMA: fungsi hapus yang benar + await
   window.hapusProyek = async (id) => {
     if (!confirm("Yakin hapus proyek ini? Semua transaksi juga akan ikut terhapus!")) return;
     try {
