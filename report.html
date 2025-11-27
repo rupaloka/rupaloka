@@ -5,73 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Laporan Keuangan Proyek - Rupaloka Studio</title>
   <style>
-    body {
-   font-family: Arial, sans-serif;
-   background: white;
-   margin: 40px;
-   color: #000;
-   line-height: 1.6;
- }
- .container {
-   max-width: 800px;
-   margin: 0 auto;
-   border: 2px solid #000;
-   padding: 30px;
- }
- h1, h2 {
-   text-align: center;
-   margin: 0 0 20px 0;
- }
- h1 { font-size: 24px; }
- h2 { font-size: 18px; color: #333; }
- table {
-   width: 100%;
-   margin: 15px 0;
-   border-collapse: collapse;
- }
- td {
-   padding: 6px 0;
-   vertical-align: top;
- }
- .label {
-   width: 180px;
-   font-weight: bold;
- }
- .value {
-   text-align: right;
-   padding-right: 20px;
- }
- .total {
-   font-weight: bold;
-   border-top: 2px solid #000;
-   padding-top: 8px;
-   margin-top: 8px;
- }
- .section {
-   margin: 25px 0;
- }
- .history {
-   margin-top: 50px;
-   max-width: 800px;
-   margin-left: auto;
-   margin-right: auto;
-   font-size: 14px;
- }
- .history h3 {
-   color: #d32f2f;
-   margin-bottom: 10px;
-   text-align: center;
- }
- .trans {
-   margin: 6px 0;
-   color: #333;
- }
- .kredit { color: #d32f2f; }
- .debet { color: #2e7d32; }
- @media print {
-   body { margin: 10px; }
-   .no-print { display: none; }
- }
+    body {font-family:Arial,sans-serif;background:white;margin:40px;color:#000;line-height:1.6;}
+    .container {max-width:800px;margin:0 auto;border:2px solid #000;padding:30px;}
+    h1,h2 {text-align:center;margin:0 0 20px 0;}
+    h1 {font-size:24px;} h2 {font-size:18px;color:#333;}
+    table {width:100%;margin:15px 0;border-collapse:collapse;}
+    td {padding:6px 0;vertical-align:top;}
+    .label {width:180px;font-weight:bold;}
+    .value {text-align:right;padding-right:20px;}
+    .total {font-weight:bold;border-top:2px solid #000;padding-top:8px;margin-top:8px;}
+    .section {margin:25px 0;}
+    .history {margin-top:50px;max-width:800px;margin-left:auto;margin-right:auto;font-size:14px;}
+    .history h3 {color:#d32f2f;margin-bottom:10px;text-align:center;}
+    .trans {margin:6px 0;color:#333;}
+    .kredit {color:#d32f2f;} .debet {color:#2e7d32;}
+    @media print {body{margin:10px;}.no-print{display:none;}}
   </style>
 </head>
 <body>
@@ -90,7 +38,6 @@
     <strong>Pendapatan :</strong>
     <table>
       <tr><td class="label">Pembayaran Termin</td><td class="value" id="termin">Rp 0</td></tr>
-      <!-- BARIS "Pembayaran Lain-lain" SUDAH DIHAPUS -->
       <tr><td class="label">Lain-lain</td><td class="value" id="lainDebet">Rp 0</td></tr>
       <tr><td class="total">Total Pendapatan</td><td class="value total" id="totalPendapatan">Rp 0</td></tr>
     </table>
@@ -107,10 +54,10 @@
     </table>
   </div>
 
-  <table style="margin-top: 30px;">
+  <table style="margin-top:30px;">
     <tr>
       <td class="label" style="font-size:20px;">Untung/Rugi</td>
-      <td class="value" id="untungRugi" style="font-size:20px; font-weight:bold;">Rp 0</td>
+      <td class="value" id="untungRugi" style="font-size:20px;font-weight:bold;">Rp 0</td>
     </tr>
   </table>
 </div>
@@ -120,7 +67,7 @@
   <div id="historyList"></div>
 </div>
 
-<button class="no-print" onclick="window.print()" style="margin:50px auto; display:block; padding:12px 30px; background:#f97316; color:white; border:none; border-radius:8px; font-size:16px; cursor:pointer;">
+<button class="no-print" onclick="window.print()" style="margin:50px auto;display:block;padding:12px 30px;background:#f97316;color:white;border:none;border-radius:8px;font-size:16px;cursor:pointer;">
   Cetak / Simpan PDF
 </button>
 
@@ -146,6 +93,7 @@
 
   const rp = (n) => new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(n);
 
+  // Ambil nama proyek
   const projDoc = await getDoc(doc(db, "projects", projectId));
   if (projDoc.exists()) {
     const p = projDoc.data();
@@ -157,13 +105,7 @@
   const totals = { termin: 0, lainDebet: 0, gaji: 0, material: 0, operasional: 0, lainKredit: 0 };
   const historyList = document.getElementById("historyList");
 
-  const q = query(
-    collection(db, "transactions"),
-    where("projectId", "==", projectId),
-    orderBy("tanggal", "desc"),
-    orderBy("createdAt", "desc")
-  );
-
+  const q = query(collection(db, "transactions"), where("projectId", "==", projectId), orderBy("tanggal", "desc"), orderBy("createdAt", "desc"));
   const snapshot = await getDocs(q);
 
   snapshot.forEach(d => {
@@ -174,8 +116,11 @@
     line.className = "trans";
 
     if (t.tipe === "debet") {
-      if (t.kategori === "Pembayaran Termin") totals.termin += t.jumlah;
-      else totals.lainDebet += t.jumlah;   // semua selain Termin masuk ke Lain-lain
+      if (t.kategori === "Pembayaran Termin") {
+        totals.termin += t.jumlah;
+      } else {
+        totals.lainDebet += t.jumlah;   // ← INI YANG PENTING! Semua debet selain Termin masuk Lain-lain (termasuk data lama "Pembayaran Lain")
+      }
       line.innerHTML = `<span class="debet">Debet</span> | ${date} | ${t.kategori}${keterangan} | ${rp(t.jumlah)}`;
     } else {
       if (t.kategori === "Gaji") totals.gaji += t.jumlah;
@@ -187,6 +132,7 @@
     historyList.appendChild(line);
   });
 
+  // Isi semua nilai
   document.getElementById("termin").textContent = rp(totals.termin);
   document.getElementById("lainDebet").textContent = rp(totals.lainDebet);
   document.getElementById("gaji").textContent = rp(totals.gaji);
@@ -196,4 +142,12 @@
 
   const totalPendapatan = totals.termin + totals.lainDebet;
   const totalPengeluaran = totals.gaji + totals.material + totals.operasional + totals.lainKredit;
-  const untungRugi = totalPend
+  const untungRugi = totalPendapatan - totalPengeluaran;
+
+  document.getElementById("totalPendapatan").textContent = rp(totalPendapatan);
+  document.getElementById("totalPengeluaran").textContent = rp(totalPengeluaran);
+  document.getElementById("untungRugi").textContent = rp(untungRugi);
+  document.getElementById("untungRugi").style.color = untungRugi >= 0 ? "green" : "red";
+</script>
+</body>
+</html>
