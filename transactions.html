@@ -72,7 +72,6 @@
   </div>
 </div>
 
-<!-- Modal Edit -->
 <div class="modal" id="modal">
   <div class="modal-content">
     <span class="close" onclick="closeModal()">X</span>
@@ -117,20 +116,16 @@
 
   const rp = (n) => new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(n);
 
-  // Load nama proyek
   getDoc(doc(db, "projects", projectId)).then(d => {
-    if (d.exists()) {
-      document.getElementById("projectName").textContent = d.data().namaProyek;
-    }
+    if (d.exists()) document.getElementById("projectName").textContent = d.data().namaProyek;
   });
 
-  // Sembunyikan tombol cetak kalau user adalah david
   if (user.username === "david") {
     document.getElementById("printBtn").style.display = "none";
   }
 
-  // KATEGORI BARU — Pinjaman Masuk & Transport sudah dihapus
-  const debetOpts = ["Pembayaran Termin", "Pembayaran Lain", "Lain-lain"];
+  // SATU-SATUNYA PERUBAHAN: "Pembayaran Lain" dihapus dari dropdown
+  const debetOpts = ["Pembayaran Termin", "Lain-lain"];
   const kreditOpts = ["Gaji", "Material", "Operasional", "Lain-lain"];
 
   document.getElementById("tipe").onchange = function() {
@@ -153,61 +148,31 @@
       return;
     }
 
-    try {
-      await addDoc(collection(db, "transactions"), {
-        projectId,
-        tanggal,
-        tipe,
-        kategori,
-        keterangan,
-        jumlah,
-        createdBy: user.username,
-        createdAt: new Date(),
-        updatedBy: user.username,
-        updatedAt: new Date()
-      });
+    await addDoc(collection(db, "transactions"), {
+      projectId, tanggal, tipe, kategori, keterangan, jumlah,
+      createdBy: user.username, createdAt: new Date(),
+      updatedBy: user.username, updatedAt: new Date()
+    });
 
-      alert("Transaksi berhasil ditambahkan!");
-      document.getElementById("jumlah").value = "";
-      document.getElementById("keterangan").value = "";
-      document.getElementById("tipe").value = "";
-      document.getElementById("kategori").innerHTML = "<option value=''>Kategori</option>";
-      document.getElementById("kategori").disabled = true;
-      document.getElementById("tanggal").valueAsDate = new Date();
-    } catch (e) {
-      console.error(e);
-      alert("Gagal menambah transaksi.");
-    }
+    alert("Transaksi berhasil ditambahkan!");
+    document.getElementById("jumlah").value = "";
+    document.getElementById("keterangan").value = "";
+    document.getElementById("tipe").value = "";
+    document.getElementById("kategori").innerHTML = "<option value=''>Kategori</option>";
+    document.getElementById("kategori").disabled = true;
+    document.getElementById("tanggal").valueAsDate = new Date();
   };
 
-  // Query khusus david
   let q;
   if (user.username === "david") {
-    q = query(
-      collection(db, "transactions"),
-      where("projectId", "==", projectId),
-      where("createdBy", "==", "david"),
-      orderBy("tanggal", "desc"),
-      orderBy("createdAt", "desc")
-    );
+    q = query(collection(db, "transactions"), where("projectId", "==", projectId), where("createdBy", "==", "david"), orderBy("tanggal", "desc"), orderBy("createdAt", "desc"));
   } else {
-    q = query(
-      collection(db, "transactions"),
-      where("projectId", "==", projectId),
-      orderBy("tanggal", "desc"),
-      orderBy("createdAt", "desc")
-    );
+    q = query(collection(db, "transactions"), where("projectId", "==", projectId), orderBy("tanggal", "desc"), orderBy("createdAt", "desc"));
   }
 
   const listDiv = document.getElementById("list");
-
   onSnapshot(q, (snapshot) => {
-    listDiv.innerHTML = "";
-    if (snapshot.empty) {
-      listDiv.innerHTML = "<p style='text-align:center;color:#94a3b8;padding:100px 0;font-size:18px;'>Belum ada transaksi</p>";
-      return;
-    }
-
+    listDiv.innerHTML = snapshot.empty ? "<p style='text-align:center;color:#94a3b8;padding:100px 0;font-size:18px;'>Belum ada transaksi</p>" : "";
     snapshot.forEach(d => {
       const t = d.data();
       const item = document.createElement("div");
@@ -217,20 +182,16 @@
         <div class="sub">${new Date(t.tanggal).toLocaleDateString("id-ID", {weekday:"long", day:"numeric", month:"long", year:"numeric"})}</div>
         <div class="creator">Dibuat: ${t.createdBy}${t.updatedBy && t.updatedBy !== t.createdBy ? " • Edit: " + t.updatedBy : ""}</div>
       `;
-
       const canEdit = user.role === "admin" || user.username === "fajrin" || user.username === t.createdBy;
       if (canEdit) {
         item.style.cursor = "pointer";
         item.onclick = () => openEditModal(d.id, t);
       }
-
       listDiv.appendChild(item);
     });
   });
 
-  // Modal Edit (tetap pakai kategori terbaru)
   let currentDocId = null;
-
   function openEditModal(docId, data) {
     currentDocId = docId;
     document.getElementById("e_tanggal").value = data.tanggal;
@@ -252,14 +213,10 @@
     document.getElementById("modal").style.display = "flex";
   }
 
-  function closeModal() {
-    document.getElementById("modal").style.display = "none";
-    currentDocId = null;
-  }
+  function closeModal() { document.getElementById("modal").style.display = "none"; currentDocId = null; }
 
   document.getElementById("save").onclick = async () => {
     if (!currentDocId) return;
-
     const updated = {
       tanggal: document.getElementById("e_tanggal").value,
       tipe: document.getElementById("e_tipe").value,
@@ -269,33 +226,20 @@
       updatedBy: user.username,
       updatedAt: new Date()
     };
-
     await updateDoc(doc(db, "transactions", currentDocId), updated);
     closeModal();
   };
 
   document.getElementById("hapus").onclick = async () => {
-    if (!currentDocId) return;
-    if (!confirm("Yakin ingin menghapus transaksi ini?")) return;
-
+    if (!currentDocId || !confirm("Yakin ingin menghapus transaksi ini?")) return;
     const allowed = user.role === "admin" || user.username === "fajrin";
-    if (!allowed) {
-      alert("Hanya admin atau fajrin yang boleh menghapus.");
-      return;
-    }
-
+    if (!allowed) { alert("Hanya admin atau fajrin yang boleh menghapus."); return; }
     await deleteDoc(doc(db, "transactions", currentDocId));
     closeModal();
   };
 
-  window.onclick = e => {
-    if (e.target === document.getElementById("modal")) closeModal();
-  };
-
-  document.getElementById("printBtn").onclick = () => {
-    window.open(`report.html?project=${projectId}`, '_blank');
-  };
-
+  window.onclick = e => { if (e.target === document.getElementById("modal")) closeModal(); };
+  document.getElementById("printBtn").onclick = () => window.open(`report.html?project=${projectId}`, '_blank');
   document.getElementById("tanggal").valueAsDate = new Date();
 </script>
 </body>
