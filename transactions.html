@@ -124,13 +124,14 @@
     }
   });
 
-  // === KHUSUS DAVID: Sembunyikan tombol cetak & batasi data ===
+  // Sembunyikan tombol cetak kalau user adalah david
   if (user.username === "david") {
     document.getElementById("printBtn").style.display = "none";
   }
 
-  const debetOpts = ["Pembayaran Termin", "Pembayaran Lain", "Pinjaman Masuk", "Lain-lain"];
-  const kreditOpts = ["Gaji", "Material", "Operasional", "Transport", "Lain-lain"];
+  // KATEGORI BARU — Pinjaman Masuk & Transport sudah dihapus
+  const debetOpts = ["Pembayaran Termin", "Pembayaran Lain", "Lain-lain"];
+  const kreditOpts = ["Gaji", "Material", "Operasional", "Lain-lain"];
 
   document.getElementById("tipe").onchange = function() {
     const kat = document.getElementById("kategori");
@@ -179,7 +180,7 @@
     }
   };
 
-  // Query: David hanya lihat transaksi buatannya sendiri
+  // Query khusus david
   let q;
   if (user.username === "david") {
     q = query(
@@ -227,7 +228,7 @@
     });
   });
 
-  // Modal Edit & Hapus (tetap sama)
+  // Modal Edit (tetap pakai kategori terbaru)
   let currentDocId = null;
 
   function openEditModal(docId, data) {
@@ -291,12 +292,10 @@
     if (e.target === document.getElementById("modal")) closeModal();
   };
 
-  // Tombol Cetak
   document.getElementById("printBtn").onclick = () => {
     window.open(`report.html?project=${projectId}`, '_blank');
   };
 
-  // Default tanggal hari ini
   document.getElementById("tanggal").valueAsDate = new Date();
 </script>
 </body>
