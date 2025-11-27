@@ -49,6 +49,11 @@
       <button class="logout-btn" onclick="logout()">Logout</button>
     </div>
 
+    <button onclick="document.getElementById('formTambahProyek').style.display='block'" 
+            style="background:#10b981;color:white;padding:14px 30px;border:none;border-radius:10px;font-size:16px;cursor:pointer;">
+      + Tambah Proyek Baru
+    </button>
+
     <div id="formTambahProyek">
       <h3 style="color:#1e40af; margin-top:0;">Tambah Proyek Baru</h3>
       <input type="text" id="namaProyek" placeholder="Nama Proyek" required />
@@ -62,85 +67,96 @@
     </div>
   </div>
 
-  <script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js';
-    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, doc, deleteDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js';
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+  import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyBiE0oYuXiPNJKC4p7PtfkFeI0sci3BdgI",
-      authDomain: "rupaloka-keuangan.firebaseapp.com",
-      projectId: "rupaloka-keuangan",
-      storageBucket: "rupaloka-keuangan.firebasestorage.app",
-      messagingSenderId: "740474161638",
-      appId: "1:740474161638:web:1b1a62ad204085a8226e27"
-    };
+  const firebaseConfig = {
+    apiKey: "AIzaSyBiE0oYuXiPNJKC4p7PtfkFeI0sci3BdgI",
+    authDomain: "rupaloka-keuangan.firebaseapp.com",
+    projectId: "rupaloka-keuangan",
+    storageBucket: "rupaloka-keuangan.firebasestorage.app",
+    messagingSenderId: "740474161638",
+    appId: "1:740474161638:web:1b1a62ad204085a8226e27"
+  };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
 
-    const user = JSON.parse(localStorage.getItem("user"));
-    if (!user) window.location.href = "index.html";
-    if (user.role === "admin") document.getElementById("formTambahProyek").style.display = "block";
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  if (!user.username) location.href = "index.html";
 
-    const rupiah = (n) => new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(n);
+  const rupiah = (n) => new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(n);
 
-    // Tambah Proyek
-    document.getElementById("btnTambahProyek")?.addEventListener("click", async () => {
-      const nama = document.getElementById("namaProyek").value.trim();
-      const pemberi = document.getElementById("pemberiKerja").value.trim();
-      const nilai = parseInt(document.getElementById("nilaiProyek").value);
-      if (!nama || !pemberi || !nilai) return alert("Isi semua kolom!");
+  // Tambah Proyek
+  document.getElementById("btnTambahProyek")?.addEventListener("click", async () => {
+    const nama = document.getElementById("namaProyek").value.trim();
+    const pemberi = document.getElementById("pemberiKerja").value.trim();
+    const nilai = parseInt(document.getElementById("nilaiProyek").value);
+    if (!nama || !pemberi || !nilai) return alert("Isi semua kolom!");
 
-      await addDoc(collection(db, "projects"), { namaProyek: nama, pemberiKerja: pemberi, nilaiProyek: nilai, createdAt: new Date() });
-      alert("Proyek berhasil ditambahkan!");
-      document.getElementById("namaProyek").value = "";
-      document.getElementById("pemberiKerja").value = "";
-      document.getElementById("nilaiProyek").value = "";
+    await addDoc(collection(db, "projects"), { 
+      namaProyek: nama, pemberiKerja: pemberi, nilaiProyek: nilai, createdAt: new Date() 
     });
+    alert("Proyek berhasil ditambahkan!");
+    document.getElementById("namaProyek").value = "";
+    document.getElementById("pemberiKerja").value = "";
+    document.getElementById("nilaiProyek").value = "";
+  });
 
-    // Load Proyek
-    const list = document.getElementById("projectList");
-    const q = query(collection(db, "projects"), orderBy("createdAt", "desc"));
-    onSnapshot(q, (snap) => {
-      list.innerHTML = "";
-      if (snap.empty) {
-        list.innerHTML = "<p style='text-align:center; color:#999; padding:60px 0; font-size:18px;'>Belum ada proyek.</p>";
-        return;
-      }
-      snap.forEach((d) => {
-        const p = d.data();
-        const item = document.createElement("div");
-        item.className = "project-item";
-        item.onclick = () => location.href = `transactions.html?project=${d.id}`;
+  // Load Proyek
+  const list = document.getElementById("projectList");
+  const q = query(collection(db, "projects"), orderBy("createdAt", "desc"));
+  onSnapshot(q, (snap) => {
+    list.innerHTML = "";
+    if (snap.empty) {
+      list.innerHTML = "<p style='text-align:center; color:#999; padding:60px 0; font-size:18px;'>Belum ada proyek.</p>";
+      return;
+    }
+    snap.forEach((d) => {
+      const p = d.data();
+      const item = document.createElement("div");
+      item.className = "project-item";
+      item.onclick = () => location.href = `transactions.html?project=${d.id}`;
 
-        item.innerHTML = `
-          <div class="project-name">${p.namaProyek}</div>
-          <div class="project-info">${p.pemberiKerja} • ${rupiah(p.nilaiProyek)}</div>
-          ${user.role === "admin" ? `
-            <div class="admin-actions">
-              <button onclick="event.stopPropagation(); editProyek('${d.id}', '${p.namaProyek}', '${p.pemberiKerja}', ${p.nilaiProyek})" title="Edit">Edit</button>
-              <button onclick="event.stopPropagation(); if(confirm('Hapus proyek ini?')) deleteDoc(doc(db,'projects','${d.id}'))" title="Hapus" style="color:#dc2626;">Delete</button>
-            </div>
-          ` : ""}
-        `;
-        list.appendChild(item);
+      item.innerHTML = `
+        <div class="project-name">${p.namaProyek}</div>
+        <div class="project-info">${p.pemberiKerja} • ${rupiah(p.nilaiProyek)}</div>
+        ${user.role === "admin" ? `
+          <div class="admin-actions">
+            <button onclick="event.stopPropagation(); editProyek('${d.id}', '${p.namaProyek}', '${p.pemberiKerja}', ${p.nilaiProyek})" title="Edit">Edit</button>
+            <button onclick="event.stopPropagation(); hapusProyek('${d.id}')" title="Hapus" style="color:#dc2626;">Delete</button>
+          </div>
+        ` : ""}
+      `;
+      list.appendChild(item);
+    });
+  });
+
+  // PERBAIKEAN UTAMA: fungsi hapus yang benar + await
+  window.hapusProyek = async (id) => {
+    if (!confirm("Yakin hapus proyek ini? Semua transaksi juga akan ikut terhapus!")) return;
+    try {
+      await deleteDoc(doc(db, "projects", id));
+      alert("Proyek berhasil dihapus!");
+    } catch (e) {
+      alert("Gagal menghapus: " + e.message);
+    }
+  };
+
+  window.editProyek = async (id, nama, pemberi, nilai) => {
+    const newNama = prompt("Nama Proyek", nama);
+    const newPemberi = prompt("Pemberi Kerja", pemberi);
+    const newNilai = prompt("Nilai Proyek", nilai);
+    if (newNama && newPemberi && newNilai) {
+      await updateDoc(doc(db, "projects", id), {
+        namaProyek: newNama, pemberiKerja: newPemberi, nilaiProyek: parseInt(newNilai)
       });
-    });
+      alert("Proyek diperbarui!");
+    }
+  };
 
-    // Edit Proyek (simple prompt)
-    window.editProyek = async (id, nama, pemberi, nilai) => {
-      const newNama = prompt("Nama Proyek", nama);
-      const newPemberi = prompt("Pemberi Kerja", pemberi);
-      const newNilai = prompt("Nilai Proyek", nilai);
-      if (newNama && newPemberi && newNilai) {
-        await updateDoc(doc(db, "projects", id), {
-          namaProyek: newNama, pemberiKerja: newPemberi, nilaiProyek: parseInt(newNilai)
-        });
-        alert("Proyek diperbarui!");
-      }
-    };
-
-    window.logout = () => { localStorage.clear(); location.href = "index.html"; };
-  </script>
+  window.logout = () => { localStorage.clear(); location.href = "index.html"; };
+</script>
 </body>
 </html>
