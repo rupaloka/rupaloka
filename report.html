@@ -70,6 +70,9 @@
 <button class="no-print" onclick="window.print()" style="margin:50px auto;display:block;padding:12px 30px;background:#f97316;color:white;border:none;border-radius:8px;font-size:16px;cursor:pointer;">
   Cetak / Simpan PDF
 </button>
+<button class="no-print" onclick="cetakLaporanDavid()" style="margin:50px auto;display:block;padding:12px 30px;background:#f97316;color:white;border:none;border-radius:8px;font-size:16px;cursor:pointer;">
+  Cetak Laporan David
+</button>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
@@ -93,7 +96,6 @@
 
   const rp = (n) => new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(n);
 
-  // Ambil nama proyek
   const projDoc = await getDoc(doc(db, "projects", projectId));
   if (projDoc.exists()) {
     const p = projDoc.data();
@@ -132,7 +134,6 @@
     historyList.appendChild(line);
   });
 
-  // Isi semua nilai
   document.getElementById("termin").textContent = rp(totals.termin);
   document.getElementById("lainDebet").textContent = rp(totals.lainDebet);
   document.getElementById("gaji").textContent = rp(totals.gaji);
@@ -148,6 +149,53 @@
   document.getElementById("totalPengeluaran").textContent = rp(totalPengeluaran);
   document.getElementById("untungRugi").textContent = rp(untungRugi);
   document.getElementById("untungRugi").style.color = untungRugi >= 0 ? "green" : "red";
+
+  // Fungsi baru untuk cetak laporan David
+  window.cetakLaporanDavid = async () => {
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    if (user.username !== "david") { alert("Laporan ini hanya untuk David."); return; }
+
+    let debet = 0, kredit = 0;
+    let historyHtml = "";
+
+    const qDavid = query(collection(db, "transactions"), where("projectId", "==", projectId), where("createdBy", "==", "david"), orderBy("tanggal", "desc"), orderBy("createdAt", "desc"));
+    const snapDavid = await getDocs(qDavid);
+
+    snapDavid.forEach(d => {
+      const t = d.data();
+      const date = new Date(t.tanggal).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: '2-digit' });
+      const keterangan = t.keterangan === "-" ? "" : ` | ${t.keterangan}`;
+      const amount = rp(t.jumlah);
+      historyHtml += `<div class="trans">${t.tipe === "debet" ? '<span class="debet">Debet</span>' : '<span class="kredit">Kredit</span>'} | ${date} | ${t.kategori}${keterangan} | ${amount}</div>`;
+      if (t.tipe === "debet") debet += t.jumlah;
+      else kredit += t.jumlah;
+    });
+
+    const totalDebet = rp(debet);
+    const totalKredit = rp(kredit);
+    const untungRugiDavid = rp(debet - kredit);
+
+    const laporanHtml = `
+      <div class="container">
+        <h1>Laporan Transaksi David</h1>
+        <h2>Rupaloka Studio - Proyek: ${document.getElementById("namaProyek").textContent}</h2>
+        <div class="section">
+          <strong>Total Debet: </strong>${totalDebet}<br>
+          <strong>Total Kredit: </strong>${totalKredit}<br>
+          <strong>Untung/Rugi: </strong>${untungRugiDavid}
+        </div>
+        <div class="history">
+          <h3>History Transaksi David</h3>
+          ${historyHtml || '<p>Tidak ada transaksi.</p>'}
+        </div>
+      </div>
+    `;
+
+    const win = window.open('', '_blank');
+    win.document.write('<html><head><title>Laporan David</title><style>' + document.querySelector('style').innerHTML + '</style></head><body>' + laporanHtml + '</body></html>');
+    win.document.close();
+    win.print();
+  };
 </script>
 </body>
 </html>
