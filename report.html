@@ -152,9 +152,6 @@
 
   // Fungsi baru untuk cetak laporan David
   window.cetakLaporanDavid = async () => {
-    const user = JSON.parse(localStorage.getItem("user") || "{}");
-    if (user.username !== "david") { alert("Laporan ini hanya untuk David."); return; }
-
     let debet = 0, kredit = 0;
     let historyHtml = "";
 
