@@ -13,7 +13,7 @@ import {
 // ===== LOAD & AUTOFILL CLIENTS (STEP 2 + 3) =====
 (async () => {
   if (!clientSelect) return;
-
+ const clientCache = {};
   // 1. LOAD CLIENTS
   const clientSnap = await getDocs(collection(db, "clients"));
   clientSnap.forEach(docSnap => {
@@ -25,6 +25,15 @@ import {
     opt.textContent = data.name;
     clientSelect.appendChild(opt);
   });
+// AUTOFILL DATA KLIEN SAAT DIPILIH
+clientSelect.addEventListener("change", () => {
+  const c = clientCache[clientSelect.value];
+  if (!c) return;
+
+  clientAddress.value = c.address || "";
+  if (clientPic) clientPic.value = c.pic || "";
+  if (clientPhone) clientPhone.value = c.phone || "";
+});
 
   // 2. JIKA MODE EDIT → LOAD INVOICE SETELAH CLIENT SIAP
   if (!invoiceId) return;
