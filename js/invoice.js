@@ -28,14 +28,15 @@ document.getElementById("saveInvoice").addEventListener("click", async () => {
   }
 
   await addDoc(collection(db, "invoices"), {
-    projectId,
-    clientName: client,
-    description: desc,
-    amount,
-    status: "UNPAID",
-    createdAt: new Date(),
-    createdBy: user.username
-  });
+  projectId,
+  projectName: projectSelect.options[projectSelect.selectedIndex].text,
+  clientName: client,
+  description: desc,
+  amount,
+  status: "UNPAID",
+  createdAt: new Date()
+});
+
 
   alert("Invoice berhasil disimpan");
   location.href = "invoice-list.html";
