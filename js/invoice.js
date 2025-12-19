@@ -70,14 +70,6 @@ clientSelect.dispatchEvent(new Event("change"));
   document.querySelector("h1").textContent = "Edit Invoice";
 })();
 
-clientSelect.addEventListener("change", () => {
-  const c = clientCache[clientSelect.value];
-  if (!c) return;
-
-  clientAddress.value = c.address || "";
-  if (clientPic) clientPic.value = c.pic || "";
-  if (clientPhone) clientPhone.value = c.phone || "";
-});
 
 const pad = (n) => n.toString().padStart(2, "0");
 
