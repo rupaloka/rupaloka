@@ -104,5 +104,6 @@ const docRef = await addDoc(collection(db, "invoices"), {
   createdAt: new Date()
 });
 alert("Invoice berhasil disimpan");
-  window.location.href = `invoice-print.html?id=${docRef.id}`;
+ window.location.href = "invoice-list.html";
+
 });
