@@ -3,11 +3,17 @@ import {
   collection,
   addDoc,
   getDocs,
+  getDoc,      // ⬅️ TAMBAH
+  updateDoc,   // ⬅️ TAMBAH
+  doc,         // ⬅️ TAMBAH
   query,
   where,
   orderBy
 } from "./firebase.js";
 // ===== LOAD & AUTOFILL CLIENTS (STEP 2 + 3) =====
+const params = new URLSearchParams(window.location.search);
+const invoiceId = params.get("id"); // null = create, ada = edit
+
 const clientSelect = document.getElementById("clientSelect");
 const clientAddress = document.getElementById("clientAddress");
 const clientPic = document.getElementById("clientPic");
@@ -39,6 +45,31 @@ clientSelect.addEventListener("change", () => {
   if (clientPic) clientPic.value = c.pic || "";
   if (clientPhone) clientPhone.value = c.phone || "";
 });
+(async () => {
+  if (!invoiceId) return;
+
+  const snap = await getDoc(doc(db, "invoices", invoiceId));
+  if (!snap.exists()) return;
+
+  const d = snap.data();
+
+  document.getElementById("invoiceDate").value =
+    d.invoiceDate.toDate().toISOString().split("T")[0];
+
+  document.getElementById("dueDate").value =
+    d.dueDate.toDate().toISOString().split("T")[0];
+
+  clientAddress.value = d.clientAddress || "";
+  if (clientPic) clientPic.value = d.clientPic || "";
+  if (clientPhone) clientPhone.value = d.clientPhone || "";
+
+  document.getElementById("description").value = d.description || "";
+  document.getElementById("amount").value = d.amount || "";
+  document.getElementById("ppn").value = d.ppnPercent || 0;
+
+  // label halaman
+  document.querySelector("h1").textContent = "Edit Invoice";
+})();
 
 const pad = (n) => n.toString().padStart(2, "0");
 
@@ -86,24 +117,31 @@ const clientPhoneVal = clientPhone ? clientPhone.value.trim() : "";
   const invoiceNumber = await generateInvoiceNumber(invoiceDate);
 
   
-const docRef = await addDoc(collection(db, "invoices"), {
-  invoiceNumber,
+const data = {
+  invoiceNumber: invoiceId ? undefined : invoiceNumber,
   invoiceDate: new Date(invoiceDate),
   dueDate: new Date(dueDate),
 
-  // === SNAPSHOT DATA KLIEN ===
   clientName,
   clientAddress: clientAddressVal,
   clientPic: clientPicVal,
   clientPhone: clientPhoneVal,
 
-  // === DATA INVOICE ===
   description,
   amount,
   ppnPercent,
-  createdAt: new Date()
-});
-alert("Invoice berhasil disimpan");
- window.location.href = "invoice-list.html";
+  updatedAt: new Date()
+};
 
-});
+if (invoiceId) {
+  await updateDoc(doc(db, "invoices", invoiceId), data);
+  alert("Invoice berhasil diperbarui");
+} else {
+  data.createdAt = new Date();
+  data.invoiceNumber = await generateInvoiceNumber(invoiceDate);
+
+  await addDoc(collection(db, "invoices"), data);
+  alert("Invoice berhasil disimpan");
+}
+
+window.location.href = "invoice-list.html";
