@@ -3,8 +3,11 @@ import {
   collection,
   getDocs,
   query,
-  orderBy
+  orderBy,
+  deleteDoc,
+  doc
 } from "./firebase.js";
+
 
 const tableBody = document.getElementById("invoiceTable");
 
@@ -37,11 +40,22 @@ async function loadInvoices() {
       <td>${d.clientName}</td>
       <td>Rp ${formatRupiah(d.amount)}</td>
       <td>
-        <button class="btn-print"
-          onclick="window.location.href='invoice-print.html?id=${doc.id}'">
-          Cetak
-        </button>
-      </td>
+  <button class="btn-print"
+    onclick="window.location.href='invoice-print.html?id=${doc.id}'">
+    Cetak
+  </button>
+
+  <button class="btn-edit"
+    onclick="editInvoice('${doc.id}')">
+    Edit
+  </button>
+
+  <button class="btn-delete"
+    onclick="deleteInvoice('${doc.id}')">
+    Hapus
+  </button>
+</td>
+
     `;
 
     tableBody.appendChild(tr);
@@ -59,3 +73,16 @@ function formatRupiah(num) {
 }
 
 loadInvoices();
+window.editInvoice = (id) => {
+  window.location.href = `invoice.html?id=${id}`;
+};
+window.deleteInvoice = async (id) => {
+  if (!confirm("Yakin hapus invoice ini?")) return;
+
+  await deleteDoc(doc(db, "invoices", id));
+  alert("Invoice berhasil dihapus");
+
+  loadInvoices(); // reload tabel
+};
+
+
