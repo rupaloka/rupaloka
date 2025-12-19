@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <title>Buat Invoice</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <style>
+    body { font-family:Arial; background:#f5f7fa; padding:20px; }
+    .box { max-width:700px; margin:auto; background:white; padding:30px; border-radius:16px; }
+    input, select { width:100%; padding:14px; margin:10px 0; border-radius:8px; border:1px solid #ccc; }
+    button { padding:14px; background:#2563eb; color:white; border:none; border-radius:10px; width:100%; font-size:16px; cursor:pointer; }
+  </style>
+</head>
+<body>
+
+<div class="box">
+  <h2>Buat Invoice</h2>
+
+  <select id="projectSelect">
+    <option value="">Pilih Proyek</option>
+  </select>
+
+  <input id="clientName" placeholder="Nama Klien" />
+  <input id="description" placeholder="Deskripsi Invoice" />
+  <input id="amount" type="number" placeholder="Nominal (Rp)" />
+
+  <button id="saveInvoice">Simpan Invoice</button>
+</div>
+
+<script type="module" src="js/invoice.js"></script>
+</body>
+</html>
