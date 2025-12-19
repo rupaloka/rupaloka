@@ -96,7 +96,7 @@ const rupiah = (n) =>
     <div style="clear:both"></div>
 
     <div class="footer">
-      Hormat Kami,<br><br><br>
+      Hormat Kami,<br><br><br><br><br>
       <strong>Ar, Y Tekat Heri, S, ST, IAI</strong><br>
       Principle
     </div>
