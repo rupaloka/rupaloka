@@ -23,10 +23,15 @@ onSnapshot(q, (snap) => {
       <td>${i.description}</td>
       <td>${rupiah(i.amount)}</td>
       <td>
-        <button class="print" onclick="window.print()">Cetak</button>
+       <button class="print" onclick="printInvoice('${doc.id}')">Cetak</button>
+
       </td>
     `;
 
     tbody.appendChild(tr);
   });
 });
+// HARUS DI LUAR onSnapshot
+window.printInvoice = (id) => {
+  window.open(`invoice-print.html?id=${id}`, "_blank");
+};
