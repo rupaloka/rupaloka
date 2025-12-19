@@ -121,8 +121,6 @@ const clientPhoneVal = clientPhone ? clientPhone.value.trim() : "";
     return;
   }
 
-  const invoiceNumber = await generateInvoiceNumber(invoiceDate);
-
   
 const data = {
   invoiceDate: new Date(invoiceDate),
@@ -141,7 +139,11 @@ const data = {
 };
 
 if (invoiceId) {
-  await updateDoc(doc(db, "invoices", invoiceId), data);
+ await updateDoc(
+  doc(db, "invoices", invoiceId),
+  JSON.parse(JSON.stringify(data))
+);
+
   alert("Invoice berhasil diperbarui");
 } else {
   data.createdAt = new Date();
