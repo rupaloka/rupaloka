@@ -15,11 +15,11 @@ const params = new URLSearchParams(window.location.search);
 const invoiceId = params.get("id");
 
 console.log("INVOICE ID:", invoiceId); // sementara untuk cek
-
+const clientCache = {};
 // ===== LOAD & AUTOFILL CLIENTS (STEP 2 + 3) =====
 (async () => {
   if (!clientSelect) return;
- const clientCache = {};
+ 
   // 1. LOAD CLIENTS
   const clientSnap = await getDocs(collection(db, "clients"));
   clientSnap.forEach(docSnap => {
