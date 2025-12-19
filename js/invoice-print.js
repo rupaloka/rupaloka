@@ -1,36 +1,53 @@
-import { db, collection, query, orderBy, onSnapshot } from "./firebase.js";
+import { db, doc, getDoc } from "./firebase.js";
 
-const tbody = document.getElementById("invoiceTable");
+(async () => {
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get("id");
 
-const rupiah = n =>
-  new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
-    minimumFractionDigits: 0
-  }).format(n);
+  if (!id) {
+    document.getElementById("invoiceContent").innerHTML =
+      "Invoice tidak ditemukan";
+    return;
+  }
 
-const q = query(collection(db, "invoices"), orderBy("createdAt", "desc"));
+  const ref = doc(db, "invoices", id);
+  const snap = await getDoc(ref);
 
-onSnapshot(q, (snap) => {
-  tbody.innerHTML = "";
-  snap.forEach((doc) => {
-    const i = doc.data();
+  if (!snap.exists()) {
+    document.getElementById("invoiceContent").innerHTML =
+      "Invoice tidak ditemukan";
+    return;
+  }
 
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${i.projectName || "-"}</td>
-      <td>${i.clientName}</td>
-      <td>${i.description}</td>
-      <td>${rupiah(i.amount)}</td>
-      <td>
-        <button onclick="printInvoice('${doc.id}')">Cetak</button>
-      </td>
-    `;
-    tbody.appendChild(tr);
-  });
-});
+  const i = snap.data();
 
-// ⬇️ HARUS DI LUAR onSnapshot
-window.printInvoice = (id) => {
-  window.open(`invoice-print.html?id=${id}`, "_blank");
-};
+  document.getElementById("invoiceContent").innerHTML = `
+    <h1>INVOICE</h1>
+    <small>${new Date(
+      i.createdAt.seconds * 1000
+    ).toLocaleDateString("id-ID")}</small>
+
+    <hr>
+
+    <table>
+      <tr>
+        <td><strong>Proyek</strong></td>
+        <td>${i.projectName}</td>
+      </tr>
+      <tr>
+        <td><strong>Klien</strong></td>
+        <td>${i.clientName}</td>
+      </tr>
+      <tr>
+        <td><strong>Deskripsi</strong></td>
+        <td>${i.description}</td>
+      </tr>
+      <tr>
+        <td><strong>Total</strong></td>
+        <td class="right"><strong>Rp ${i.amount.toLocaleString(
+          "id-ID"
+        )}</strong></td>
+      </tr>
+    </table>
+  `;
+})();
