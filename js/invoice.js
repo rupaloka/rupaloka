@@ -93,7 +93,7 @@ const docRef = await addDoc(collection(db, "invoices"), {
 
   // === SNAPSHOT DATA KLIEN ===
   clientName,
-  clientAddress,
+  clientAddress: clientAddressVal,
   clientPic: clientPicVal,
   clientPhone: clientPhoneVal,
 
