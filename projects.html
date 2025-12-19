@@ -50,20 +50,21 @@
     </div>
 
     <!-- HANYA ADMIN YANG BISA LIHAT TOMBOL & FORM TAMBAH PROYEK -->
-    <div id="adminOnlySection" style="display:none;">
-      <button onclick="document.getElementById('formTambahProyek').style.display='block'" 
-              style="background:#10b981;color:white;padding:14px 30px;border:none;border-radius:10px;font-size:16px;cursor:pointer;">
-        + Tambah Proyek Baru
-      </button>
+    <div id="adminOnlySection" style="display:none; margin-bottom:20px; display:flex; gap:12px;">
 
-      <div id="formTambahProyek">
-        <h3 style="color:#1e40af; margin-top:0;">Tambah Proyek Baru</h3>
-        <input type="text" id="namaProyek" placeholder="Nama Proyek" required />
-        <input type="text" id="pemberiKerja" placeholder="Pemberi Kerja" required />
-        <input type="number" id="nilaiProyek" placeholder="Nilai Proyek (contoh: 100000000)" required />
-        <button id="btnTambahProyek">Tambah Proyek</button>
-      </div>
-    </div>
+  <button
+    onclick="location.href='invoice.html'"
+    style="background:#f59e0b;color:white;padding:14px 30px;border:none;border-radius:10px;font-size:16px;cursor:pointer;">
+    + Invoice
+  </button>
+
+  <button
+    onclick="document.getElementById('formTambahProyek').style.display='block'"
+    style="background:#10b981;color:white;padding:14px 30px;border:none;border-radius:10px;font-size:16px;cursor:pointer;">
+    + Project Baru
+  </button>
+
+</div>
 
     <div id="projectList">
       <p style="text-align:center; color:#888; padding:50px 0;">Loading proyek...</p>
@@ -167,3 +168,4 @@
 </script>
 </body>
 </html>
+
