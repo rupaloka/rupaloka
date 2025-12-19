@@ -7,21 +7,38 @@ import {
   where,
   orderBy
 } from "./firebase.js";
-// ===== LOAD CLIENTS (STEP 2) =====
+// ===== LOAD & AUTOFILL CLIENTS (STEP 2 + 3) =====
+const clientSelect = document.getElementById("clientSelect");
+const clientAddress = document.getElementById("clientAddress");
+const clientPic = document.getElementById("clientPic");
+const clientPhone = document.getElementById("clientPhone");
+
+const clientCache = {};
+
 (async () => {
-  const clientSelect = document.getElementById("clientSelect");
   if (!clientSelect) return;
 
   const snap = await getDocs(collection(db, "clients"));
 
   snap.forEach(doc => {
-    const c = doc.data();
+    const data = doc.data();
+    clientCache[doc.id] = data;
+
     const opt = document.createElement("option");
     opt.value = doc.id;
-    opt.textContent = c.name;
+    opt.textContent = data.name;
     clientSelect.appendChild(opt);
   });
 })();
+
+clientSelect.addEventListener("change", () => {
+  const c = clientCache[clientSelect.value];
+  if (!c) return;
+
+  clientAddress.value = c.address || "";
+  if (clientPic) clientPic.value = c.pic || "";
+  if (clientPhone) clientPhone.value = c.phone || "";
+});
 
 const pad = (n) => n.toString().padStart(2, "0");
 
