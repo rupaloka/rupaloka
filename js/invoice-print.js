@@ -46,13 +46,24 @@ const rupiah = (n) =>
         <div>Office & Workshop : Jl Swadaya, Kec Talang Kelapa, Kab Banyuasin</div>
         <div>Sumatera Selatan</div>
       </div>
-      <div>
-        <strong>INVOICE</strong><br>
-        No: ${i.invoiceNumber}<br>
-       Tanggal: ${formatDate(i.invoiceDate)}<br>
-Jatuh Tempo: ${formatDate(i.dueDate)}
+      <div class="invoice-info">
+  <div class="title">INVOICE</div>
+  <table>
+    <tr>
+      <td>No</td>
+      <td>: ${i.invoiceNumber}</td>
+    </tr>
+    <tr>
+      <td>Tanggal</td>
+      <td>: ${formatDate(i.invoiceDate)}</td>
+    </tr>
+    <tr>
+      <td>Jatuh Tempo</td>
+      <td>: ${formatDate(i.dueDate)}</td>
+    </tr>
+  </table>
+</div>
 
-      </div>
     </div>
 
     <strong>Tagihan Kepada:</strong><br>
