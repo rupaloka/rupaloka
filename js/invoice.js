@@ -103,6 +103,6 @@ const docRef = await addDoc(collection(db, "invoices"), {
   ppnPercent,
   createdAt: new Date()
 });
-
+alert("Invoice berhasil disimpan");
   window.location.href = `invoice-print.html?id=${docRef.id}`;
 });
