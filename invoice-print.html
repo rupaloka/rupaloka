@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Invoice</title>
+
+  <style>
+    body {
+      font-family: Arial;
+      padding: 40px;
+      color: #000;
+    }
+
+    .invoice {
+      max-width: 700px;
+      margin: auto;
+    }
+
+    h1 { margin-bottom: 5px; }
+    hr { margin: 20px 0; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    td {
+      padding: 10px 0;
+    }
+
+    .right { text-align: right; }
+
+    @media print {
+      button { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="invoice" id="invoiceContent">
+  Loading invoice...
+</div>
+
+<button onclick="window.print()">Cetak PDF</button>
+
+<script type="module" src="js/invoice-print.js"></script>
+</body>
+</html>
