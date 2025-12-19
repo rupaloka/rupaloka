@@ -8,7 +8,7 @@ import {
   doc,         // ⬅️ TAMBAH
   query,
   where,
-  orderBy
+  orderBy,
   deleteField
 } from "./firebase.js";
 
