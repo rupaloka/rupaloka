@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Daftar Invoice</title>
+  <style>
+    body { font-family:Arial; background:#f5f7fa; padding:20px; }
+    .box { max-width:900px; margin:auto; background:white; padding:30px; border-radius:16px; }
+    table { width:100%; border-collapse:collapse; }
+    th, td { padding:12px; border-bottom:1px solid #ddd; }
+    th { background:#f1f5f9; text-align:left; }
+    button { padding:8px 14px; border:none; border-radius:6px; cursor:pointer; }
+    .print { background:#2563eb; color:white; }
+  </style>
+</head>
+<body>
+
+<div class="box">
+  <h2>Daftar Invoice</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Proyek</th>
+        <th>Klien</th>
+        <th>Deskripsi</th>
+        <th>Nominal</th>
+        <th>Aksi</th>
+      </tr>
+    </thead>
+    <tbody id="invoiceTable"></tbody>
+  </table>
+</div>
+
+<script type="module" src="js/invoice-list.js"></script>
+</body>
+</html>
