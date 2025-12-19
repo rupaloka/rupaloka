@@ -48,10 +48,6 @@ clientSelect.addEventListener("change", () => {
   if (!invoiceSnap.exists()) return;
 
   const d = invoiceSnap.data();
-// auto pilih klien saat edit
-clientSelect.value = d.clientId;
-clientSelect.dispatchEvent(new Event("change"));
-
   
 // ===== TAMBAHAN WAJIB (AUTO SELECT KLIEN SAAT EDIT) =====
 clientSelect.value = d.clientId;
