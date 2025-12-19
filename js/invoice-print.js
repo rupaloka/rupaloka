@@ -42,7 +42,7 @@ const rupiah = (n) =>
     <div class="header">
       <div class="company">
         <h1>Rupaloka Studio</h1>
-        <div>Design & Built</div>
+        <div>Architecture - Design & Built</div>
         <div>Office & Workshop : Jl Swadaya, Kec Talang Kelapa, Kab Banyuasin</div>
         <div>Sumatera Selatan</div>
       </div>
