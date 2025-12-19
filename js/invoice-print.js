@@ -91,7 +91,7 @@ const rupiah = (n) =>
     Rekening Pembayaran :<br>
     Bank Mandiri<br>
     1130-0010-88800<br>
-    <strong>Y Tekat Heri Susanto ST / Fajrin Elfarisi</strong>
+    <strong>Y Tekat Heri Susanto / Fajrin Elfarisi</strong>
   </div>
 </div>
 
