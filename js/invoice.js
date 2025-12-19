@@ -127,7 +127,8 @@ const data = {
   invoiceDate: new Date(invoiceDate),
   dueDate: new Date(dueDate),
 
-  clientId: clientSelect.value || d?.clientId || null,
+  clientId: clientSelect.value || null,
+
   clientName,
   clientAddress: clientAddressVal,
   clientPic: clientPicVal,
