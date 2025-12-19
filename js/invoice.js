@@ -66,7 +66,12 @@ async function generateInvoiceNumber(dateStr) {
 document.getElementById("saveInvoice").addEventListener("click", async () => {
   const invoiceDate = document.getElementById("invoiceDate").value;
   const dueDate = document.getElementById("dueDate").value;
-  const clientName = document.getElementById("clientName").value.trim();
+  const clientName =
+  clientSelect.options[clientSelect.selectedIndex]?.text || "";
+
+const clientPicVal = clientPic ? clientPic.value.trim() : "";
+const clientPhoneVal = clientPhone ? clientPhone.value.trim() : "";
+
   const clientAddress = document.getElementById("clientAddress").value.trim();
   const description = document.getElementById("description").value.trim();
   const amount = parseInt(document.getElementById("amount").value);
@@ -90,6 +95,23 @@ document.getElementById("saveInvoice").addEventListener("click", async () => {
     ppnPercent,
     createdAt: new Date()
   });
+const docRef = await addDoc(collection(db, "invoices"), {
+  invoiceNumber,
+  invoiceDate: new Date(invoiceDate),
+  dueDate: new Date(dueDate),
+
+  // === SNAPSHOT DATA KLIEN ===
+  clientName,
+  clientAddress,
+  clientPic: clientPicVal,
+  clientPhone: clientPhoneVal,
+
+  // === DATA INVOICE ===
+  description,
+  amount,
+  ppnPercent,
+  createdAt: new Date()
+});
 
   window.location.href = `invoice-print.html?id=${docRef.id}`;
 });
