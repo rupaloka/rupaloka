@@ -7,6 +7,21 @@ import {
   where,
   orderBy
 } from "./firebase.js";
+// ===== LOAD CLIENTS (STEP 2) =====
+(async () => {
+  const clientSelect = document.getElementById("clientSelect");
+  if (!clientSelect) return;
+
+  const snap = await getDocs(collection(db, "clients"));
+
+  snap.forEach(doc => {
+    const c = doc.data();
+    const opt = document.createElement("option");
+    opt.value = doc.id;
+    opt.textContent = c.name;
+    clientSelect.appendChild(opt);
+  });
+})();
 
 const pad = (n) => n.toString().padStart(2, "0");
 
