@@ -33,6 +33,9 @@ import {
   if (!invoiceSnap.exists()) return;
 
   const d = invoiceSnap.data();
+// ===== TAMBAHAN WAJIB (AUTO SELECT KLIEN SAAT EDIT) =====
+clientSelect.value = d.clientId;
+clientSelect.dispatchEvent(new Event("change"));
 
   document.getElementById("invoiceDate").value =
     d.invoiceDate.toDate().toISOString().split("T")[0];
