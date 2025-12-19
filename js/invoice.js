@@ -8,9 +8,10 @@ import {
   doc,
   query,
   where,
-  orderBy,
-  deleteField
+  orderBy
 } from "./firebase.js";
+
+import { deleteField } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const params = new URLSearchParams(window.location.search);
 const invoiceId = params.get("id");
