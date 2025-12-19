@@ -84,6 +84,16 @@ const rupiah = (n) =>
         </tr>
       </tbody>
     </table>
+    
+<div class="notes">
+  <div class="box">
+    <strong>Catatan :</strong>
+    Rekening Pembayaran :<br>
+    Bank Mandiri<br>
+    1130-0010-88800<br>
+    <strong>Y Tekat Heri Susanto ST / Fajrin Elfarisi</strong>
+  </div>
+</div>
 
     <div class="summary">
       <table>
