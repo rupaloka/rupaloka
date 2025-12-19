@@ -72,7 +72,8 @@ document.getElementById("saveInvoice").addEventListener("click", async () => {
 const clientPicVal = clientPic ? clientPic.value.trim() : "";
 const clientPhoneVal = clientPhone ? clientPhone.value.trim() : "";
 
-  const clientAddress = document.getElementById("clientAddress").value.trim();
+ const clientAddressVal = clientAddress.value.trim();
+
   const description = document.getElementById("description").value.trim();
   const amount = parseInt(document.getElementById("amount").value);
   const ppnPercent = parseInt(document.getElementById("ppn").value) || 0;
@@ -84,17 +85,7 @@ const clientPhoneVal = clientPhone ? clientPhone.value.trim() : "";
 
   const invoiceNumber = await generateInvoiceNumber(invoiceDate);
 
-  const docRef = await addDoc(collection(db, "invoices"), {
-    invoiceNumber,
-    invoiceDate: new Date(invoiceDate),
-    dueDate: new Date(dueDate),
-    clientName,
-    clientAddress,
-    description,
-    amount,
-    ppnPercent,
-    createdAt: new Date()
-  });
+  
 const docRef = await addDoc(collection(db, "invoices"), {
   invoiceNumber,
   invoiceDate: new Date(invoiceDate),
