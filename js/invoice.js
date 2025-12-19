@@ -50,7 +50,8 @@ clientSelect.addEventListener("change", () => {
   const d = invoiceSnap.data();
   
 // ===== TAMBAHAN WAJIB (AUTO SELECT KLIEN SAAT EDIT) =====
-clientSelect.value = d.clientId;
+clientSelect.value = String(d.clientId).trim();
+
 clientSelect.dispatchEvent(new Event("change"));
 
   document.getElementById("invoiceDate").value =
