@@ -52,6 +52,16 @@ clientSelect.addEventListener("change", () => {
   if (!snap.exists()) return;
 
   const d = snap.data();
+if (d.clientId) {
+  clientSelect.value = d.clientId;
+
+  const c = clientCache[d.clientId];
+  if (c) {
+    clientAddress.value = c.address || "";
+    if (clientPic) clientPic.value = c.pic || "";
+    if (clientPhone) clientPhone.value = c.phone || "";
+  }
+}
 
   document.getElementById("invoiceDate").value =
     d.invoiceDate.toDate().toISOString().split("T")[0];
@@ -99,6 +109,7 @@ document.getElementById("saveInvoice").addEventListener("click", async () => {
   const dueDate = document.getElementById("dueDate").value;
   const clientName =
   clientSelect.options[clientSelect.selectedIndex]?.text || "";
+const clientId = clientSelect.value;
 
 const clientPicVal = clientPic ? clientPic.value.trim() : "";
 const clientPhoneVal = clientPhone ? clientPhone.value.trim() : "";
@@ -122,10 +133,12 @@ const data = {
   invoiceDate: new Date(invoiceDate),
   dueDate: new Date(dueDate),
 
+  clientId,          // ⬅️ INI KUNCI
   clientName,
   clientAddress: clientAddressVal,
   clientPic: clientPicVal,
   clientPhone: clientPhoneVal,
+
 
   description,
   amount,
