@@ -3,9 +3,9 @@ import {
   collection,
   addDoc,
   getDocs,
-  getDoc,      // ⬅️ TAMBAH
-  updateDoc,   // ⬅️ TAMBAH
-  doc,         // ⬅️ TAMBAH
+  getDoc,
+  updateDoc,
+  doc,
   query,
   where,
   orderBy,
