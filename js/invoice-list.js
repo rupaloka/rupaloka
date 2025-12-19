@@ -64,8 +64,19 @@ async function loadInvoices() {
 
 function formatDate(ts) {
   if (!ts) return "-";
-  const d = ts.toDate();
-  return d.toLocaleDateString("id-ID");
+
+  // Jika Firestore Timestamp
+  if (typeof ts.toDate === "function") {
+    return ts.toDate().toLocaleDateString("id-ID");
+  }
+
+  // Jika sudah Date biasa
+  if (ts instanceof Date) {
+    return ts.toLocaleDateString("id-ID");
+  }
+
+  // Fallback (string / number)
+  return new Date(ts).toLocaleDateString("id-ID");
 }
 
 function formatRupiah(num) {
