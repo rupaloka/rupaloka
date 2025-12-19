@@ -38,5 +38,6 @@ document.getElementById("saveInvoice").addEventListener("click", async () => {
   });
 
   alert("Invoice berhasil disimpan");
-  location.href = "projects.html";
+  location.href = "invoice-list.html";
+
 });
