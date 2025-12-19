@@ -10,6 +10,12 @@ import {
   where,
   orderBy
 } from "./firebase.js";
+
+const params = new URLSearchParams(window.location.search);
+const invoiceId = params.get("id");
+
+console.log("INVOICE ID:", invoiceId); // sementara untuk cek
+
 // ===== LOAD & AUTOFILL CLIENTS (STEP 2 + 3) =====
 (async () => {
   if (!clientSelect) return;
