@@ -9,6 +9,7 @@ import {
   query,
   where,
   orderBy
+  deleteField
 } from "./firebase.js";
 
 const params = new URLSearchParams(window.location.search);
@@ -141,7 +142,10 @@ const data = {
 if (invoiceId) {
  await updateDoc(
   doc(db, "invoices", invoiceId),
-  JSON.parse(JSON.stringify(data))
+  {
+    ...JSON.parse(JSON.stringify(data)),
+    invoiceNumber: deleteField()
+  }
 );
 
   alert("Invoice berhasil diperbarui");
