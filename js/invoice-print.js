@@ -1,5 +1,22 @@
 import { db, doc, getDoc } from "./firebase.js";
 
+function formatDate(ts) {
+  if (!ts) return "-";
+
+  // Firestore Timestamp
+  if (typeof ts.toDate === "function") {
+    return ts.toDate().toLocaleDateString("id-ID");
+  }
+
+  // Date biasa
+  if (ts instanceof Date) {
+    return ts.toLocaleDateString("id-ID");
+  }
+
+  // fallback
+  return new Date(ts).toLocaleDateString("id-ID");
+}
+
 const rupiah = (n) =>
   new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -32,8 +49,9 @@ const rupiah = (n) =>
       <div>
         <strong>INVOICE</strong><br>
         No: ${i.invoiceNumber}<br>
-        Tanggal: ${i.invoiceDate.toDate().toLocaleDateString("id-ID")}<br>
-        Jatuh Tempo: ${i.dueDate.toDate().toLocaleDateString("id-ID")}
+       Tanggal: ${formatDate(i.invoiceDate)}<br>
+Jatuh Tempo: ${formatDate(i.dueDate)}
+
       </div>
     </div>
 
