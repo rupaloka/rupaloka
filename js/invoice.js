@@ -49,10 +49,14 @@ clientSelect.addEventListener("change", () => {
 
   const d = invoiceSnap.data();
   
-// ===== TAMBAHAN WAJIB (AUTO SELECT KLIEN SAAT EDIT) =====
-clientSelect.value = String(d.clientId).trim();
+// === LOAD DATA KLIEN INVOICE LAMA (TANPA MAKSA SELECT) ===
+clientAddress.value = d.clientAddress || "";
+if (clientPic) clientPic.value = d.clientPic || "";
+if (clientPhone) clientPhone.value = d.clientPhone || "";
 
-clientSelect.dispatchEvent(new Event("change"));
+// tampilkan nama klien lama sebagai option readonly
+clientSelect.innerHTML = `<option value="" selected>${d.clientName}</option>` + clientSelect.innerHTML;
+
 
   document.getElementById("invoiceDate").value =
     d.invoiceDate.toDate().toISOString().split("T")[0];
@@ -121,16 +125,14 @@ const clientPhoneVal = clientPhone ? clientPhone.value.trim() : "";
 
   
 const data = {
-  invoiceNumber: invoiceId ? undefined : invoiceNumber,
   invoiceDate: new Date(invoiceDate),
   dueDate: new Date(dueDate),
 
-  clientId,          // ⬅️ INI KUNCI
+  clientId: clientSelect.value || d?.clientId || null,
   clientName,
   clientAddress: clientAddressVal,
   clientPic: clientPicVal,
   clientPhone: clientPhoneVal,
-
 
   description,
   amount,
