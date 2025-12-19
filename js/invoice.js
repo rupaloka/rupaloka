@@ -138,3 +138,4 @@ if (invoiceId) {
 }
 
 window.location.href = "invoice-list.html";
+});
