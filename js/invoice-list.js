@@ -1,37 +1,61 @@
-import { db, collection, query, orderBy, onSnapshot } from "./firebase.js";
+import {
+  db,
+  collection,
+  getDocs,
+  query,
+  orderBy
+} from "./firebase.js";
 
-const tbody = document.getElementById("invoiceTable");
+const tableBody = document.getElementById("invoiceTable");
 
-const rupiah = n =>
-  new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
-    minimumFractionDigits: 0
-  }).format(n);
+async function loadInvoices() {
+  tableBody.innerHTML = "<tr><td colspan='5'>Loading...</td></tr>";
 
-const q = query(collection(db, "invoices"), orderBy("createdAt", "desc"));
+  const q = query(
+    collection(db, "invoices"),
+    orderBy("createdAt", "desc")
+  );
 
-onSnapshot(q, (snap) => {
-  tbody.innerHTML = "";
+  const snap = await getDocs(q);
+
+  if (snap.empty) {
+    tableBody.innerHTML =
+      "<tr><td colspan='5'>Belum ada invoice</td></tr>";
+    return;
+  }
+
+  tableBody.innerHTML = "";
+
   snap.forEach(doc => {
-    const i = doc.data();
+    const d = doc.data();
+
     const tr = document.createElement("tr");
 
     tr.innerHTML = `
-      <td>${i.projectName || "-"}</td>
-      <td>${i.clientName}</td>
-      <td>${i.description}</td>
-      <td>${rupiah(i.amount)}</td>
+      <td>${d.invoiceNumber}</td>
+      <td>${formatDate(d.invoiceDate)}</td>
+      <td>${d.clientName}</td>
+      <td>Rp ${formatRupiah(d.amount)}</td>
       <td>
-       <button class="print" onclick="printInvoice('${doc.id}')">Cetak</button>
-
+        <button class="btn-print"
+          onclick="window.location.href='invoice-print.html?id=${doc.id}'">
+          Cetak
+        </button>
       </td>
     `;
 
-    tbody.appendChild(tr);
+    tableBody.appendChild(tr);
   });
-});
-// HARUS DI LUAR onSnapshot
-window.printInvoice = (id) => {
-  window.open(`invoice-print.html?id=${id}`, "_blank");
-};
+}
+
+function formatDate(ts) {
+  if (!ts) return "-";
+  const d = ts.toDate();
+  return d.toLocaleDateString("id-ID");
+}
+
+function formatRupiah(num) {
+  return num.toLocaleString("id-ID");
+}
+
+loadInvoices();
