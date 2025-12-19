@@ -1,40 +1,69 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Daftar Invoice</title>
+  <link rel="stylesheet" href="css/style.css" />
   <style>
-    body { font-family:Arial; background:#f5f7fa; padding:20px; }
-    .box { max-width:900px; margin:auto; background:white; padding:30px; border-radius:16px; }
-    table { width:100%; border-collapse:collapse; }
-    th, td { padding:12px; border-bottom:1px solid #ddd; }
-    th { background:#f1f5f9; text-align:left; }
-    button { padding:8px 14px; border:none; border-radius:6px; cursor:pointer; }
-    .print { background:#2563eb; color:white; }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid #ddd;
+      text-align: left;
+    }
+    th {
+      background: #f5f5f5;
+    }
+    button {
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+    }
+    .btn-back {
+      background: #6b7280;
+      color: #fff;
+    }
+    .btn-print {
+      background: #2563eb;
+      color: #fff;
+    }
   </style>
 </head>
 <body>
 
-<div class="box">
-  <!-- TOMBOL KEMBALI -->
-  <button
-    onclick="location.href='projects.html'"
-    style="margin-bottom:20px; background:#64748b; color:white; padding:10px 18px; border:none; border-radius:8px; cursor:pointer;">
-    ← Kembali ke Project
-  </button>
-  <h2>Daftar Invoice</h2>
+<div class="container">
+  <div class="header">
+    <h2>Daftar Invoice</h2>
+    <button class="btn-back" onclick="window.location.href='projects.html'">
+      ⬅ Kembali ke Project
+    </button>
+  </div>
 
   <table>
     <thead>
       <tr>
-        <th>Proyek</th>
+        <th>No Invoice</th>
+        <th>Tanggal</th>
         <th>Klien</th>
-        <th>Deskripsi</th>
-        <th>Nominal</th>
+        <th>Nilai</th>
         <th>Aksi</th>
       </tr>
     </thead>
-    <tbody id="invoiceTable"></tbody>
+    <tbody id="invoiceTable">
+      <tr>
+        <td colspan="5">Loading...</td>
+      </tr>
+    </tbody>
   </table>
 </div>
 
