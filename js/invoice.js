@@ -146,7 +146,7 @@ if (invoiceId) {
   doc(db, "invoices", invoiceId),
   {
     ...JSON.parse(JSON.stringify(data)),
-    invoiceNumber: deleteField()
+   
   }
 );
 
