@@ -216,7 +216,8 @@
 
     if (!data.keterangan) delete data.keterangan;
 
-    await addDoc(collection(db, "transactions"), data);
+   await addDoc(collection(db, "hutang-piutang"), data);
+
 
 
     document.querySelectorAll("input, select, textarea").forEach(e => e.value = "");
