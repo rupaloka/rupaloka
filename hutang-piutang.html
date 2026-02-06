@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Transaksi Hutang Piutang</title>
+
+<style>
+  :root {
+    --bg: #f4f6f8;
+    --card: #ffffff;
+    --primary: #2563eb;
+    --text: #1f2937;
+    --muted: #6b7280;
+    --radius: 14px;
+  }
+
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+  }
+
+  .container {
+    max-width: 420px;
+    margin: auto;
+    padding: 16px;
+  }
+
+  h1 {
+    font-size: 20px;
+    text-align: center;
+    margin-bottom: 16px;
+  }
+
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 16px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+    margin-bottom: 16px;
+  }
+
+  label {
+    font-size: 13px;
+    color: var(--muted);
+    display: block;
+    margin-bottom: 6px;
+  }
+
+  input, select {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid #d1d5db;
+    font-size: 14px;
+    margin-bottom: 14px;
+    box-sizing: border-box;
+  }
+
+  button {
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    border: none;
+    background: var(--primary);
+    color: white;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  button:active {
+    transform: scale(0.98);
+  }
+
+  .list h2 {
+    font-size: 16px;
+    margin-bottom: 10px;
+  }
+
+  .item {
+    border-left: 5px solid;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: #f9fafb;
+    margin-bottom: 10px;
+  }
+
+  .debet { border-color: #dc2626; }
+  .kredit { border-color: #16a34a; }
+
+  .item small {
+    color: var(--muted);
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .amount {
+    font-weight: 700;
+    font-size: 15px;
+  }
+</style>
+</head>
+
+<body>
+<div class="container">
+  <h1>📒 Hutang Piutang</h1>
+
+  <div class="card">
+    <label>Tanggal</label>
+    <input type="date" id="tanggal"/>
+
+    <label>Tipe</label>
+    <select id="tipe">
+      <option value="">Pilih</option>
+      <option value="Debet">Debet</option>
+      <option value="Kredit">Kredit</option>
+    </select>
+
+    <label>Debitur</label>
+    <select id="debitur">
+      <option value="">Pilih</option>
+      <option>Heri</option>
+      <option>Fajrin</option>
+      <option>Rupaloka</option>
+    </select>
+
+    <label>Kreditur</label>
+    <select id="kreditur">
+      <option value="">Pilih</option>
+      <option>Heri</option>
+      <option>Fajrin</option>
+      <option>Rupaloka</option>
+    </select>
+
+    <label>Jumlah</label>
+    <input type="number" id="jumlah" placeholder="Contoh: 500000"/>
+
+    <button onclick="simpan()">Simpan Transaksi</button>
+  </div>
+
+  <div class="card list">
+    <h2>Riwayat</h2>
+    <div id="list"></div>
+  </div>
+</div>
+
+<script>
+  const listEl = document.getElementById("list");
+
+  function formatRupiah(n) {
+    return "Rp " + Number(n).toLocaleString("id-ID");
+  }
+
+  function simpan() {
+    const data = {
+      tanggal: tanggal.value,
+      tipe: tipe.value,
+      debitur: debitur.value,
+      kreditur: kreditur.value,
+      jumlah: jumlah.value
+    };
+
+    if (Object.values(data).some(v => !v)) {
+      alert("Lengkapi semua field");
+      return;
+    }
+
+    const transaksi = JSON.parse(localStorage.getItem("hutangPiutang") || "[]");
+    transaksi.unshift(data);
+    localStorage.setItem("hutangPiutang", JSON.stringify(transaksi));
+
+    document.querySelectorAll("input, select").forEach(e => e.value = "");
+    render();
+  }
+
+  function render() {
+    const transaksi = JSON.parse(localStorage.getItem("hutangPiutang") || "[]");
+    listEl.innerHTML = "";
+
+    transaksi.forEach(t => {
+      const div = document.createElement("div");
+      div.className = "item " + (t.tipe === "Debet" ? "debet" : "kredit");
+      div.innerHTML = `
+        <small>${t.tanggal} • ${t.tipe}</small>
+        <div>${t.debitur} ➝ ${t.kreditur}</div>
+        <div class="amount">${formatRupiah(t.jumlah)}</div>
+      `;
+      listEl.appendChild(div);
+    });
+  }
+
+  render();
+</script>
+</body>
+</html>
