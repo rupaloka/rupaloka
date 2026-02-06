@@ -58,7 +58,6 @@
     border: 1px solid #d1d5db;
     font-size: 14px;
     margin-bottom: 14px;
-    box-sizing: border-box;
   }
 
   button {
@@ -72,6 +71,16 @@
     font-weight: 600;
     cursor: pointer;
   }
+
+  .saldo {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    margin-bottom: 6px;
+  }
+
+  .plus { color: var(--success); }
+  .minus { color: var(--danger); }
 
   .item {
     background: #f9fafb;
@@ -90,16 +99,6 @@
   .amount {
     font-weight: 700;
   }
-
-  .saldo {
-    display: flex;
-    justify-content: space-between;
-    font-size: 14px;
-    margin-bottom: 6px;
-  }
-
-  .plus { color: var(--success); }
-  .minus { color: var(--danger); }
 </style>
 </head>
 
@@ -131,7 +130,7 @@
     <label>Jumlah</label>
     <input type="number" id="jumlah" placeholder="Contoh: 500000"/>
 
-    <button onclick="simpan()">Simpan Transaksi</button>
+    <button id="btnSimpan">Simpan Transaksi</button>
   </div>
 
   <!-- SALDO -->
@@ -147,21 +146,46 @@
   </div>
 </div>
 
-<script>
-  const listEl = document.getElementById("list");
+<!-- FIREBASE -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import {
+    getFirestore,
+    collection,
+    addDoc,
+    getDocs,
+    query,
+    orderBy,
+    serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBiE0oYuXiPNJKC4p7PtfkFeI0sci3BdgI",
+    authDomain: "rupaloka-keuangan.firebaseapp.com",
+    projectId: "rupaloka-keuangan",
+    storageBucket: "rupaloka-keuangan.firebasestorage.app",
+    messagingSenderId: "740474161638",
+    appId: "1:740474161638:web:1b1a62ad204085a8226e27"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
   const saldoEl = document.getElementById("saldo");
-  const orang = ["Heri", "Fajrin", "Rupaloka"];
+  const listEl  = document.getElementById("list");
+  const btnSimpan = document.getElementById("btnSimpan");
 
-  function rupiah(n) {
-    return "Rp " + Number(n).toLocaleString("id-ID");
-  }
+  const ORANG = ["Heri", "Fajrin", "Rupaloka"];
 
-  function simpan() {
+  const rupiah = n => "Rp " + n.toLocaleString("id-ID");
+
+  btnSimpan.onclick = async () => {
     const data = {
-      tanggal: tanggal.value,
+      tanggal: new Date(tanggal.value),
       debitur: debitur.value,
       kreditur: kreditur.value,
-      jumlah: Number(jumlah.value)
+      jumlah: Number(jumlah.value),
+      createdAt: serverTimestamp()
     };
 
     if (!data.tanggal || !data.debitur || !data.kreditur || !data.jumlah) {
@@ -174,32 +198,36 @@
       return;
     }
 
-    const db = JSON.parse(localStorage.getItem("hutangPiutang") || "[]");
-    db.unshift(data);
-    localStorage.setItem("hutangPiutang", JSON.stringify(db));
+    await addDoc(collection(db, "transactions"), data);
 
     document.querySelectorAll("input, select").forEach(e => e.value = "");
     render();
+  };
+
+  async function render() {
+    const q = query(
+      collection(db, "transactions"),
+      orderBy("createdAt", "desc")
+    );
+
+    const snap = await getDocs(q);
+    const data = [];
+    snap.forEach(d => data.push(d.data()));
+
+    renderSaldo(data);
+    renderList(data);
   }
 
-  function hitungSaldo(data) {
+  function renderSaldo(data) {
     const saldo = { Heri: 0, Fajrin: 0, Rupaloka: 0 };
+    saldoEl.innerHTML = "";
 
     data.forEach(t => {
       saldo[t.debitur] -= t.jumlah;
       saldo[t.kreditur] += t.jumlah;
     });
 
-    return saldo;
-  }
-
-  function render() {
-    const data = JSON.parse(localStorage.getItem("hutangPiutang") || "[]");
-
-    // Render saldo
-    const saldo = hitungSaldo(data);
-    saldoEl.innerHTML = "";
-    orang.forEach(o => {
+    ORANG.forEach(o => {
       const div = document.createElement("div");
       div.className = "saldo";
       div.innerHTML = `
@@ -210,14 +238,15 @@
       `;
       saldoEl.appendChild(div);
     });
+  }
 
-    // Render list
+  function renderList(data) {
     listEl.innerHTML = "";
     data.forEach(t => {
       const div = document.createElement("div");
       div.className = "item";
       div.innerHTML = `
-        <small>${t.tanggal}</small>
+        <small>${t.tanggal.toDate().toLocaleDateString("id-ID")}</small>
         <div>${t.debitur} berutang ke ${t.kreditur}</div>
         <div class="amount">${rupiah(t.jumlah)}</div>
       `;
