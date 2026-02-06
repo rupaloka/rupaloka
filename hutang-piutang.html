@@ -218,12 +218,17 @@
 
     await addDoc(collection(db, "transactions"), data);
 
+
     document.querySelectorAll("input, select, textarea").forEach(e => e.value = "");
     render();
   };
 
   async function render() {
-    const q = query(collection(db, "transactions"), orderBy("createdAt", "desc"));
+    const q = query(
+  collection(db, "hutang-piutang"),
+  orderBy("createdAt", "desc")
+);
+
     const snap = await getDocs(q);
 
     const data = [];
